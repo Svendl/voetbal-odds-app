@@ -1,0 +1,28 @@
+# Environment variables - NOOIT in Git!
+.env.local
+.env*.local
+
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Testing
+/.coverage
+
+# Production
+/.next/
+/out/
+
+# Vercel
+.vercel
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
