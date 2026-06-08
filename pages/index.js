@@ -134,4 +134,162 @@ export default function Home() {
         <div style={styles.resultsBox}>
           <div style={styles.resultsHeader}>
             {results.type === "matches" ? "📋 Wedstrijden" : "🎯 Beste Odds Tips"}
-          </di
+          </div>
+          <pre style={styles.resultsContent}>
+            {results.content}
+          </pre>
+          <div style={styles.resultsFooter}>
+            💡 Tip: Controleer altijd de actuele odds bij je bookmaker
+          </div>
+        </div>
+      )}
+
+      {!results && !loading && !error && (
+        <div style={styles.infoBox}>
+          <h2>ℹ️ Hoe werkt het?</h2>
+          <ul>
+            <li>Selecteer je favoriete competitie</li>
+            <li>Kies een datum</li>
+            <li>Klik "Wie voetbalt er vandaag?" voor alle matches</li>
+            <li>Of klik "Beste odds vandaag?" voor AI-tips</li>
+            <li>Claude AI analyseert en geeft sterke tips met odds</li>
+          </ul>
+          <p style={styles.disclaimer}>
+            ⚠️ <strong>Disclaimer:</strong> Dit zijn AI-gebaseerde analyses. Verifieer altijd bij je bookmaker. Speel verantwoord — 18+.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const styles = {
+  container: {
+    minHeight: "100vh",
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    padding: "20px",
+    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+  },
+  header: {
+    textAlign: "center",
+    color: "white",
+    marginBottom: "40px",
+    paddingTop: "20px"
+  },
+  title: {
+    fontSize: "42px",
+    margin: "0 0 10px 0",
+    fontWeight: "700"
+  },
+  subtitle: {
+    fontSize: "16px",
+    margin: "0",
+    opacity: "0.9"
+  },
+  controlPanel: {
+    maxWidth: "800px",
+    margin: "0 auto 30px",
+    backgroundColor: "white",
+    borderRadius: "12px",
+    padding: "30px",
+    boxShadow: "0 10px 40px rgba(0,0,0,0.2)"
+  },
+  section: {
+    marginBottom: "25px"
+  },
+  label: {
+    display: "block",
+    marginBottom: "10px",
+    fontWeight: "600",
+    color: "#333",
+    fontSize: "16px"
+  },
+  select: {
+    width: "100%",
+    padding: "12px",
+    fontSize: "16px",
+    borderRadius: "8px",
+    border: "2px solid #667eea",
+    backgroundColor: "white",
+    color: "#333",
+    cursor: "pointer"
+  },
+  buttonGroup: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "15px",
+    marginTop: "25px"
+  },
+  button: {
+    padding: "16px",
+    fontSize: "16px",
+    fontWeight: "600",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+    color: "white"
+  },
+  buttonPrimary: {
+    backgroundColor: "#667eea"
+  },
+  buttonSecondary: {
+    backgroundColor: "#764ba2"
+  },
+  errorBox: {
+    maxWidth: "800px",
+    margin: "0 auto 20px",
+    backgroundColor: "#fee",
+    color: "#c33",
+    padding: "16px",
+    borderRadius: "8px",
+    border: "2px solid #f99"
+  },
+  resultsBox: {
+    maxWidth: "800px",
+    margin: "0 auto",
+    backgroundColor: "white",
+    borderRadius: "12px",
+    overflow: "hidden",
+    boxShadow: "0 10px 40px rgba(0,0,0,0.2)"
+  },
+  resultsHeader: {
+    backgroundColor: "#667eea",
+    color: "white",
+    padding: "20px",
+    fontSize: "18px",
+    fontWeight: "600"
+  },
+  resultsContent: {
+    padding: "20px",
+    fontSize: "14px",
+    lineHeight: "1.6",
+    margin: "0",
+    maxHeight: "600px",
+    overflowY: "auto",
+    fontFamily: "Courier New, monospace",
+    whiteSpace: "pre-wrap"
+  },
+  resultsFooter: {
+    backgroundColor: "#f5f5f5",
+    padding: "15px 20px",
+    fontSize: "13px",
+    color: "#666",
+    borderTop: "1px solid #ddd"
+  },
+  infoBox: {
+    maxWidth: "800px",
+    margin: "0 auto",
+    backgroundColor: "white",
+    borderRadius: "12px",
+    padding: "30px",
+    boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
+    color: "#333"
+  },
+  disclaimer: {
+    marginTop: "15px",
+    padding: "15px",
+    backgroundColor: "#fff3cd",
+    borderLeft: "4px solid #ffc107",
+    fontSize: "13px"
+  }
+};
