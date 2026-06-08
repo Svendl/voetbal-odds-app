@@ -76,52 +76,40 @@ export default function Home() {
       </div>
 
       <div style={styles.controlPanel}>
-        <div style={styles.section}>
-          <label style={styles.label}>📍 Kies competitie:</label>
-         <select 
   <div style={styles.section}>
-     <label style={styles.label}>📅 Kies datum:</label>
-     <input 
-       type="date"
-       value={selectedDate}
-       onChange={(e) => setSelectedDate(e.target.value)}
-       style={styles.select }
-       disabled={loading}
-     />
-   </div>
-            value={league} 
-            onChange={(e) => setLeague(e.target.value)}
-            style={styles.select}
-            disabled={loading}
-          >
-            <option value="la-liga">🇪🇸 La Liga (Spanje)</option>
-            <option value="premier-league">🇬🇧 Premier League (Engeland)</option>
-            <option value="serie-a">🇮🇹 Serie A (Italië)</option>
-            <option value="bundesliga">🇩🇪 Bundesliga (Duitsland)</option>
-            <option value="ligue-1">🇫🇷 Ligue 1 (Frankrijk)</option>
-            <option value="eredivisie">🇳🇱 Eredivisie (Nederland)</option>
-            <option value="mls">🇺🇸 MLS (Amerika)</option>
-            <option value="wk-2026">🏆 WK 2026</option>
-          </select>
-        </div>
+    <label style={styles.label}>📍 Kies competitie:</label>
+    <select 
+      value={league} 
+      onChange={(e) => setLeague(e.target.value)}
+      style={styles.select}
+      disabled={loading}
+    >
+      <option value="la-liga">🇪🇸 La Liga (Spanje)</option>
+      <option value="premier-league">🇬🇧 Premier League (Engeland)</option>
+      <option value="serie-a">🇮🇹 Serie A (Italië)</option>
+      <option value="bundesliga">🇩🇪 Bundesliga (Duitsland)</option>
+      <option value="ligue-1">🇫🇷 Ligue 1 (Frankrijk)</option>
+      <option value="eredivisie">🇳🇱 Eredivisie (Nederland)</option>
+      <option value="mls">🇺🇸 MLS (Amerika)</option>
+      <option value="wk-2026">🏆 WK 2026</option>
+    </select>
+  </div>
 
-        <div style={styles.buttonGroup}>
-          <button 
-            onClick={handleTodaysMatches}
-            disabled={loading}
-            style={{...styles.button, ...styles.buttonPrimary}}
-          >
-            {loading ? "⏳ Laden..." : "📅 Wie voetbalt er vandaag?"}
-          </button>
-          <button 
-            onClick={handleBestOdds}
-            disabled={loading}
-            style={{...styles.button, ...styles.buttonSecondary}}
-          >
-            {loading ? "⏳ Laden..." : "💰 Beste odds vandaag"}
-          </button>
-        </div>
-      </div>
+  <div style={styles.section}>
+    <label style={styles.label}>📅 Kies datum:</label>
+    <input 
+      type="date"
+      value={selectedDate}
+      onChange={(e) => setSelectedDate(e.target.value)}
+      style={styles.select}
+      disabled={loading}
+    />
+  </div>
+
+  <div style={styles.buttonGroup}>
+    {/* buttons hier */}
+  </div>
+</div>
 
       {error && (
         <div style={styles.errorBox}>
