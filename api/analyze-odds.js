@@ -1,5 +1,5 @@
 // api/analyze-odds.js
-const Anthropic = require("@anthropic-ai/sdk").default;
+const Anthropic = require("@anthropic-ai/sdk");
 
 module.exports = async (req, res) => {
   if (req.method !== "POST") {
