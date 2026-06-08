@@ -90,6 +90,7 @@ export default function Home() {
             <option value="ligue-1">🇫🇷 Ligue 1 (Frankrijk)</option>
             <option value="eredivisie">🇳🇱 Eredivisie (Nederland)</option>
             <option value="mls">🇺🇸 MLS (Amerika)</option>
+            <option value="wk-2026">🏆 WK 2026</option>
           </select>
         </div>
 
