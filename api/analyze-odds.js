@@ -13,8 +13,30 @@ export default async (req, res) => {
     }
 
     const { analysisType, league, date } = req.body;
+    
+let userPrompt;
 
-    let userPrompt;
+// WK 2026 special handling
+if (league === "wk-2026") {
+  userPrompt = `
+Analyseer de WK 2026 voetbalwedstrijden en geef de BESTE ODDS TIPS.
+
+Focus op:
+1. Landenteams & hun huidigeformatie
+2. Groepsfase matches (${date})
+3. Historical performance van landen tegen elkaar
+4. Star players & blessurelists
+
+Voor ELKE wedstrijd die je selecteert, geef:
+1. Wedstrijd (Land A vs Land B · Tijd)
+2. Beste inzet (Uitslag / Over/Under / Speler scoort)
+3. Odds
+4. Winkans in %
+5. Risicoclassificatie (Laag/Gemiddeld/Hoog)
+6. Analyse
+
+Geef MAXIMAAL 4-5 sterke tips.`;
+} else if (analysisType === "matches") {
     
     if (analysisType === "matches") {
       userPrompt = `
