@@ -3,6 +3,7 @@ import { useState } from "react";
 
 export default function Home() {
   const [league, setLeague] = useState("la-liga");
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState(null);
   const [error, setError] = useState(null);
@@ -13,7 +14,7 @@ export default function Home() {
     setResults(null);
 
     try {
-      const today = new Date().toISOString().split("T")[0];
+      const today = selectedDate;
       const response = await fetch("/api/analyze-odds", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -43,7 +44,7 @@ export default function Home() {
     setResults(null);
 
     try {
-      const today = new Date().toISOString().split("T")[0];
+      const today = selectedDate;
       const response = await fetch("/api/analyze-odds", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -77,7 +78,17 @@ export default function Home() {
       <div style={styles.controlPanel}>
         <div style={styles.section}>
           <label style={styles.label}>📍 Kies competitie:</label>
-          <select 
+         <select 
+  <div style={styles.section}>
+     <label style={styles.label}>📅 Kies datum:</label>
+     <input 
+       type="date"
+       value={selectedDate}
+       onChange={(e) => setSelectedDate(e.target.value)}
+       style={styles.select }
+       disabled={loading}
+     />
+   </div>
             value={league} 
             onChange={(e) => setLeague(e.target.value)}
             style={styles.select}
