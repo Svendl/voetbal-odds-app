@@ -1,7 +1,7 @@
 // api/analyze-odds.js
-import Anthropic from "@anthropic-ai/sdk";
+const Anthropic = require("@anthropic-ai/sdk").default;
 
-export default async (req, res) => {
+module.exports = async (req, res) => {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
@@ -13,58 +13,49 @@ export default async (req, res) => {
     }
 
     const { analysisType, league, date } = req.body;
-    
-let userPrompt;
 
-// WK 2026 special handling
-if (league === "wk-2026") {
-  userPrompt = `
-Analyseer de WK 2026 voetbalwedstrijden en geef de BESTE ODDS TIPS.
+    let userPrompt;
+
+    if (league === "wk-2026") {
+      userPrompt = `
+Analyseer de WK 2026 voetbalwedstrijden van vandaag (${date}) en geef de BESTE ODDS TIPS.
 
 Focus op:
-1. Landenteams & hun huidigeformatie
-2. Groepsfase matches (${date})
-3. Historical performance van landen tegen elkaar
-4. Star players & blessurelists
+1. Landenteams & huidigeformatie
+2. Groepsfase matches
+3. Historical performance
+4. Star players & blessures
 
-Voor ELKE wedstrijd die je selecteert, geef:
-1. Wedstrijd (Land A vs Land B · Tijd)
+Voor ELKE wedstrijd, geef:
+1. Land A vs Land B · Tijd
 2. Beste inzet (Uitslag / Over/Under / Speler scoort)
 3. Odds
 4. Winkans in %
 5. Risicoclassificatie (Laag/Gemiddeld/Hoog)
-6. Analyse
+6. Korte analyse
 
-Geef MAXIMAAL 4-5 sterke tips.`;
-} else if (analysisType === "matches") {
-    
-    if (analysisType === "matches") {
+MAXIMAAL 4-5 tips.`;
+    } else if (analysisType === "matches") {
       userPrompt = `
 Geef alle voetbalwedstrijden die vandaag (${date}) in ${league} gespeeld worden.
 
 Format:
-- Team A vs Team B · Tijd · Stadion · Huidigestand teams
+- Team A vs Team B · Tijd · Stadion
 
-Sorteer op tijd (vroegste eerst).`;
+Sorteer op tijd.`;
     } else {
       userPrompt = `
-Analyseer de voetbalwedstrijden van vandaag (${date}) in ${league} en geef de BESTE ODDS TIPS.
+Analyseer voetbalwedstrijden van vandaag (${date}) in ${league} en geef BESTE ODDS TIPS.
 
-Voor ELKE wedstrijd die je selecteert, geef:
+Voor ELKE wedstrijd:
 1. Wedstrijd (Team A vs Team B · Tijd)
-2. Beste inzet (bijv: Uitslag / BTTS / Over X.5 goals / Speler scoort)
+2. Beste inzet
 3. Odds
 4. Winkans in %
 5. Risicoclassificatie (Laag=70%+ / Gemiddeld=55-70% / Hoog=<55%)
-6. Korte analyse (waarom)
+6. Analyse
 
-WICHTIG:
-- Risico moet EXACT aansluiten op winkans percentage
-- Sorteer op winkans (hoogste eerst)
-- Include huidigeformatie en blessures als bekend
-- Geef SOURCES (welke experts/modellen adviseren dit)
-
-Geef MAXIMAAL 4-5 sterke tips, niet meer.`;
+MAXIMAAL 4-5 sterke tips.`;
     }
 
     const client = new Anthropic({ apiKey });
