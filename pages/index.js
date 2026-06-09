@@ -141,13 +141,13 @@ const WK_2026_DATA = {
       matches: []
     }
   },
-  topscorers: [
-    { rank: 1, speler: "Kylian Mbappé", team: "Frankrijk", goals: 3, assists: 1, rating: 8.5 },
-    { rank: 2, speler: "Harry Kane", team: "Engeland", goals: 2, assists: 2, rating: 8.2 },
-    { rank: 3, speler: "Vinícius Júnior", team: "Brazilië", goals: 2, assists: 1, rating: 8.1 },
-    { rank: 4, speler: "Neymar", team: "Brazilië", goals: 1, assists: 3, rating: 7.9 },
-    { rank: 5, speler: "Erling Haaland", team: "Noorwegen", goals: 1, assists: 1, rating: 7.8 },
-    { rank: 6, speler: "Robert Lewandowski", team: "Polen", goals: 1, assists: 0, rating: 7.6 }
+topscorers: [
+    { rank: 1, speler: "Kylian Mbappé", team: "Frankrijk", goals: 0, assists: 0, rating: 0.0 },
+    { rank: 2, speler: "Harry Kane", team: "Engeland", goals: 0, assists: 0, rating: 0.0 },
+    { rank: 3, speler: "Vinícius Júnior", team: "Brazilië", goals: 0, assists: 0, rating: 0.0 },
+    { rank: 4, speler: "Neymar", team: "Brazilië", goals: 0, assists: 0, rating: 0.0 },
+    { rank: 5, speler: "Erling Haaland", team: "Noorwegen", goals: 0, assists: 0, rating: 0.0 },
+    { rank: 6, speler: "Robert Lewandowski", team: "Polen", goals: 0, assists: 0, rating: 0.0 }
   ]
 };
 
