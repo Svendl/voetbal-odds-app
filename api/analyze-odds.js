@@ -5,11 +5,45 @@ export default async (req, res) => {
 
   try {
     const apiKey = process.env.CLAUDE_API_KEY;
+    const oddsApiKey = process.env.ODDS_API_KEY;
+    
     if (!apiKey) {
-      return res.status(500).json({ error: "API key not configured" });
+      return res.status(500).json({ error: "Claude API key not configured" });
+    }
+    if (!oddsApiKey) {
+      return res.status(500).json({ error: "Odds API key not configured" });
     }
 
     const { analysisType, league, date } = req.body;
+
+    // Haal real matches + odds op van Odds API
+    let matchesData = "";
+    try {
+      const oddsResponse = await fetch(
+        `https://api.the-odds-api.com/v4/sports/soccer_${getOddsLeagueCode(league)}/odds?apiKey=${oddsApiKey}&regions=eu&oddsFormat=decimal&markets=h2h`,
+        { headers: { "User-Agent": "OddsAnalyzer" } }
+      );
+      
+      if (oddsResponse.ok) {
+        const oddsJson = await oddsResponse.json();
+        const events = oddsJson.events || [];
+        
+        // Filter by date
+        const filteredEvents = events.filter(event => {
+          const eventDate = new Date(event.commence_time).toISOString().split("T")[0];
+          return eventDate === date;
+        });
+
+        if (filteredEvents.length > 0) {
+          matchesData = filteredEvents.map(event => {
+            const odds = event.bookmakers[0]?.markets[0]?.outcomes || [];
+            return `${event.home_team} vs ${event.away_team} - Home: ${odds[0]?.price || "N/A"}, Away: ${odds[1]?.price || "N/A"}`;
+          }).join("\n");
+        }
+      }
+    } catch (oddsErr) {
+      console.log("Odds API call failed, continuing without live odds");
+    }
 
     const systemPrompt = `Je bent een expert voetbal-odds analist. Je antwoordt ALTIJD in VALID JSON format.
 
@@ -48,13 +82,15 @@ REGELS:
 - PARLAY: 3 verdubbelaars (1 laag, 1 gemiddeld, 1 hoog risico)
 - ALTIJD JSON, geen markdown, geen tekst buiten JSON
 - "why" velden zijn 1-2 korte, heldere zinnen
-- Odds realistische decimale getallen
+- Odds MOETEN realistisch zijn gebaseerd op beschikbare data
 - win_chance is percentage (0-100)`;
 
     let userPrompt;
 
     if (league === "wk-2026") {
       userPrompt = `Analyseer WK 2026 voetbalwedstrijden van ${date}.
+
+${matchesData ? `REAL MATCHES VAN VANDAAG:\n${matchesData}\n\nGebruik DEZE odds!` : "Analyseer WK matches op basis van historische data."}
 
 Geef 15 betting tips (5 laag + 5 gemiddeld + 5 hoog risico) + 3 verdubbelaars in JSON format.
 
@@ -69,11 +105,15 @@ STRICT JSON OUTPUT ALLEEN.`;
     } else if (analysisType === "matches") {
       userPrompt = `Geef voetbalwedstrijden van ${date} in ${league}.
 
-Format: JSON met "matches" array. Elk match: {"home":"Team A", "away":"Team B", "time":"HH:MM", "stadium":"Stadion"}
+${matchesData ? `REAL MATCHES:\n${matchesData}` : "Geen matches beschikbaar voor deze datum."}
+
+Format: JSON met "matches" array. Elk match: {"home":"Team A", "away":"Team B", "odds_home":1.50, "odds_away":2.50}
 
 STRICT JSON OUTPUT ALLEEN.`;
     } else {
       userPrompt = `Analyseer voetbalwedstrijden van ${date} in ${league}.
+
+${matchesData ? `REAL MATCHES VAN VANDAAG:\n${matchesData}\n\nGebruik DEZE odds!` : "Analyseer op basis van historische data."}
 
 Geef 15 betting tips (5 laag + 5 gemiddeld + 5 hoog risico) + 3 verdubbelaars in JSON format.
 
@@ -118,7 +158,8 @@ STRICT JSON OUTPUT ALLEEN.`;
     res.status(200).json({
       success: true,
       analysis: analysis,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      has_live_odds: matchesData ? true : false
     });
 
   } catch (error) {
@@ -129,3 +170,17 @@ STRICT JSON OUTPUT ALLEEN.`;
     });
   }
 };
+
+function getOddsLeagueCode(league) {
+  const codes = {
+    "la-liga": "spain_la_liga",
+    "premier-league": "england_premier_league",
+    "serie-a": "italy_serie_a",
+    "bundesliga": "germany_bundesliga",
+    "ligue-1": "france_ligue_1",
+    "eredivisie": "netherlands_eredivisie",
+    "mls": "usa_mls",
+    "wk-2026": "fifa_world_cup"
+  };
+  return codes[league] || "england_premier_league";
+}
