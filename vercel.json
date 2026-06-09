@@ -5,7 +5,7 @@
   "framework": "nextjs",
   "crons": [
     {
-      "path": "/api/update-poules",
+      "path": "/api/cron-update-poules",
       "schedule": "0 */6 * * *"
     }
   ]
