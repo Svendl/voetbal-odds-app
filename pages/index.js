@@ -1,13 +1,15 @@
 import { useState } from "react";
 
 export default function Home() {
+  const [currentPage, setCurrentPage] = useState("home");
   const [league, setLeague] = useState("wk-2026");
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState(null);
   const [error, setError] = useState(null);
+  const [useWebSearch, setUseWebSearch] = useState(true);
 
-  const handleBestOdds = async () => {
+  const handleAnalysis = async () => {
     setLoading(true);
     setError(null);
     setResults(null);
@@ -19,7 +21,8 @@ export default function Home() {
         body: JSON.stringify({
           analysisType: "best-odds",
           league: league,
-          date: selectedDate
+          date: selectedDate,
+          useWebSearch: useWebSearch
         })
       });
 
@@ -36,6 +39,127 @@ export default function Home() {
     setLoading(false);
   };
 
+  const renderHome = () => (
+    <div style={styles.homeContainer}>
+      <div style={styles.heroSection}>
+        <h1 style={styles.heroTitle}>⚽ VOETBAL ODDS ANALYZER</h1>
+        <p style={styles.heroSubtitle}>AI-aangestuurde betting tips & voetbal statistieken</p>
+      </div>
+
+      <div style={styles.menuGrid}>
+        <button
+          onClick={() => setCurrentPage("poule")}
+          style={styles.menuButton("gradient1")}
+        >
+          <div style={styles.menuIcon}>📋</div>
+          <h2 style={styles.menuTitle}>Poule & Uitslagen</h2>
+          <p style={styles.menuDesc}>Groepindelingen en matchresultaten</p>
+        </button>
+
+        <button
+          onClick={() => setCurrentPage("stats")}
+          style={styles.menuButton("gradient2")}
+        >
+          <div style={styles.menuIcon}>🏆</div>
+          <h2 style={styles.menuTitle}>Topscoorders & Stats</h2>
+          <p style={styles.menuDesc}>Beste spelers & cijfers</p>
+        </button>
+
+        <button
+          onClick={() => { setCurrentPage("betting"); setUseWebSearch(true); }}
+          style={styles.menuButton("gradient3")}
+        >
+          <div style={styles.menuIcon}>💎</div>
+          <h2 style={styles.menuTitle}>Gokken (Real-time)</h2>
+          <p style={styles.menuDesc}>Real-time odds analyse</p>
+          <p style={styles.menuPrice}>💰 €0.50-1.00 per analyse</p>
+        </button>
+
+        <button
+          onClick={() => { setCurrentPage("betting"); setUseWebSearch(false); }}
+          style={styles.menuButton("gradient4")}
+        >
+          <div style={styles.menuIcon}>⚡</div>
+          <h2 style={styles.menuTitle}>Gokken (Budget)</h2>
+          <p style={styles.menuDesc}>Tips + voeg odds zelf in</p>
+          <p style={styles.menuPrice}>💰 €0.05-0.10 per analyse</p>
+        </button>
+      </div>
+
+      <div style={styles.footerHome}>
+        <p>🎯 Kies een optie om te starten • Speel verantwoord • 18+</p>
+      </div>
+    </div>
+  );
+
+  const renderBetting = () => (
+    <div style={styles.pageContainer}>
+      <button onClick={() => setCurrentPage("home")} style={styles.backButton}>
+        ← Terug naar menu
+      </button>
+
+      <div style={styles.bettingHeader}>
+        <h1>{useWebSearch ? "💎 Real-time Odds Analyse" : "⚡ Budget Analyse"}</h1>
+        <p>{useWebSearch ? "Web search enabled - Echte odds" : "Zonder web search - Jij voegt odds in"}</p>
+      </div>
+
+      <div style={styles.controlPanel}>
+        <div style={styles.section}>
+          <label style={styles.label}>📍 Competitie:</label>
+          <select 
+            value={league} 
+            onChange={(e) => setLeague(e.target.value)}
+            style={styles.select}
+            disabled={loading}
+          >
+            <option value="wk-2026">🏆 WK 2026</option>
+            <option value="la-liga">🇪🇸 La Liga</option>
+            <option value="premier-league">🇬🇧 Premier League</option>
+            <option value="serie-a">🇮🇹 Serie A</option>
+            <option value="bundesliga">🇩🇪 Bundesliga</option>
+            <option value="ligue-1">🇫🇷 Ligue 1</option>
+            <option value="eredivisie">🇳🇱 Eredivisie</option>
+          </select>
+        </div>
+
+        <div style={styles.section}>
+          <label style={styles.label}>📅 Datum:</label>
+          <input 
+            type="date"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            style={styles.select}
+            disabled={loading}
+          />
+        </div>
+
+        <button 
+          onClick={handleAnalysis}
+          disabled={loading}
+          style={styles.analyzeButton}
+        >
+          {loading ? "⏳ Analyseren..." : "🔍 Analyseer tips"}
+        </button>
+      </div>
+
+      {error && <div style={styles.errorBox}>⚠️ {error}</div>}
+
+      {results && renderTips()}
+
+      {!results && !loading && !error && (
+        <div style={styles.infoBox}>
+          <h2>ℹ️ Hoe werkt het?</h2>
+          <ul>
+            <li>Selecteer competitie en datum</li>
+            <li>Klik "Analyseer tips"</li>
+            <li>{useWebSearch ? "Claude zoekt real-time odds" : "Claude geeft tips, jij voegt odds in"}</li>
+            <li>Zie 15 tips + 3 verdubbelaars</li>
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+
   const renderTips = () => {
     if (!results || !results.data.tips) return null;
 
@@ -45,166 +169,150 @@ export default function Home() {
       <div style={styles.tipsContainer}>
         <div style={styles.statsRow}>
           <div style={styles.statCard("success")}>
-            <p style={styles.statLabel}>🟢 LAAG RISICO</p>
+            <p>🟢 LAAG RISICO</p>
             <p style={styles.statValue}>5 tips</p>
           </div>
           <div style={styles.statCard("warning")}>
-            <p style={styles.statLabel}>🟡 GEMIDDELD</p>
+            <p>🟡 GEMIDDELD</p>
             <p style={styles.statValue}>5 tips</p>
           </div>
           <div style={styles.statCard("danger")}>
-            <p style={styles.statLabel}>🔴 HOOG RISICO</p>
+            <p>🔴 HOOG RISICO</p>
             <p style={styles.statValue}>5 tips</p>
           </div>
         </div>
 
         {/* LAAG RISICO */}
-        <div style={styles.section}>
-          <h2 style={styles.sectionTitle("success")}>
-            <i className="ti ti-shield-check" style={styles.icon("success")} aria-hidden="true"></i>
-            Laag risico (70%+)
-          </h2>
+        <div style={styles.riskSection}>
+          <h2 style={styles.riskTitle("success")}>🟢 Laag risico (70%+)</h2>
           {low_risk && low_risk.map((tip) => (
             <div key={tip.id} style={styles.tipCard}>
               <div style={styles.tipTitle}>
                 <h3 style={styles.matchVs}>{tip.bet}</h3>
-                <p style={styles.winChanceMain}>{tip.win_chance}%</p>
+                <p style={styles.winChance}>{tip.win_chance}%</p>
               </div>
               <p style={styles.tipBio}>{tip.why}</p>
-              <div style={styles.bookmakerRow}>
-                <div style={styles.bookmakerItem}>
-                  <p style={styles.bookmakerLabel}>Bet365</p>
-                  <p style={styles.bookmakerPrice}>{tip.odds?.bet365 || "—"}</p>
+              {tip.odds && (
+                <div style={styles.bookmakerRow}>
+                  <div style={styles.bookmakerItem}>
+                    <p>Bet365</p>
+                    <p style={styles.oddPrice}>{tip.odds.bet365 || "—"}</p>
+                  </div>
+                  <div style={styles.bookmakerItem}>
+                    <p>Toto</p>
+                    <p style={styles.oddPrice}>{tip.odds.toto || "—"}</p>
+                  </div>
+                  <div style={styles.bookmakerItem}>
+                    <p>BetCity</p>
+                    <p style={styles.oddPrice}>{tip.odds.betcity || "—"}</p>
+                  </div>
+                  <div style={styles.bookmakerItem}>
+                    <p>Unibet</p>
+                    <p style={styles.oddPrice}>{tip.odds.unibet || "—"}</p>
+                  </div>
                 </div>
-                <div style={styles.bookmakerItem}>
-                  <p style={styles.bookmakerLabel}>Toto</p>
-                  <p style={styles.bookmakerPrice}>{tip.odds?.toto || "—"}</p>
-                </div>
-                <div style={styles.bookmakerItem}>
-                  <p style={styles.bookmakerLabel}>BetCity</p>
-                  <p style={styles.bookmakerPrice}>{tip.odds?.betcity || "—"}</p>
-                </div>
-                <div style={styles.bookmakerItem}>
-                  <p style={styles.bookmakerLabel}>Unibet</p>
-                  <p style={styles.bookmakerPrice}>{tip.odds?.unibet || "—"}</p>
-                </div>
-              </div>
+              )}
             </div>
           ))}
         </div>
 
         {/* GEMIDDELD RISICO */}
-        <div style={styles.section}>
-          <h2 style={styles.sectionTitle("warning")}>
-            <i className="ti ti-alert-circle" style={styles.icon("warning")} aria-hidden="true"></i>
-            Gemiddeld risico (55-70%)
-          </h2>
+        <div style={styles.riskSection}>
+          <h2 style={styles.riskTitle("warning")}>🟡 Gemiddeld risico (55-70%)</h2>
           {medium_risk && medium_risk.map((tip) => (
             <div key={tip.id} style={styles.tipCard}>
               <div style={styles.tipTitle}>
                 <h3 style={styles.matchVs}>{tip.bet}</h3>
-                <p style={styles.winChanceMain}>{tip.win_chance}%</p>
+                <p style={styles.winChance}>{tip.win_chance}%</p>
               </div>
               <p style={styles.tipBio}>{tip.why}</p>
-              <div style={styles.bookmakerRow}>
-                <div style={styles.bookmakerItem}>
-                  <p style={styles.bookmakerLabel}>Bet365</p>
-                  <p style={styles.bookmakerPrice}>{tip.odds?.bet365 || "—"}</p>
+              {tip.odds && (
+                <div style={styles.bookmakerRow}>
+                  <div style={styles.bookmakerItem}>
+                    <p>Bet365</p>
+                    <p style={styles.oddPrice}>{tip.odds.bet365 || "—"}</p>
+                  </div>
+                  <div style={styles.bookmakerItem}>
+                    <p>Toto</p>
+                    <p style={styles.oddPrice}>{tip.odds.toto || "—"}</p>
+                  </div>
+                  <div style={styles.bookmakerItem}>
+                    <p>BetCity</p>
+                    <p style={styles.oddPrice}>{tip.odds.betcity || "—"}</p>
+                  </div>
+                  <div style={styles.bookmakerItem}>
+                    <p>Unibet</p>
+                    <p style={styles.oddPrice}>{tip.odds.unibet || "—"}</p>
+                  </div>
                 </div>
-                <div style={styles.bookmakerItem}>
-                  <p style={styles.bookmakerLabel}>Toto</p>
-                  <p style={styles.bookmakerPrice}>{tip.odds?.toto || "—"}</p>
-                </div>
-                <div style={styles.bookmakerItem}>
-                  <p style={styles.bookmakerLabel}>BetCity</p>
-                  <p style={styles.bookmakerPrice}>{tip.odds?.betcity || "—"}</p>
-                </div>
-                <div style={styles.bookmakerItem}>
-                  <p style={styles.bookmakerLabel}>Unibet</p>
-                  <p style={styles.bookmakerPrice}>{tip.odds?.unibet || "—"}</p>
-                </div>
-              </div>
+              )}
             </div>
           ))}
         </div>
 
         {/* HOOG RISICO */}
-        <div style={styles.section}>
-          <h2 style={styles.sectionTitle("danger")}>
-            <i className="ti ti-flame" style={styles.icon("danger")} aria-hidden="true"></i>
-            Hoog risico (&lt;55%)
-          </h2>
+        <div style={styles.riskSection}>
+          <h2 style={styles.riskTitle("danger")}>🔴 Hoog risico (<55%)</h2>
           {high_risk && high_risk.map((tip) => (
             <div key={tip.id} style={styles.tipCard}>
               <div style={styles.tipTitle}>
                 <h3 style={styles.matchVs}>{tip.bet}</h3>
-                <p style={styles.winChanceMain}>{tip.win_chance}%</p>
+                <p style={styles.winChance}>{tip.win_chance}%</p>
               </div>
               <p style={styles.tipBio}>{tip.why}</p>
-              <div style={styles.bookmakerRow}>
-                <div style={styles.bookmakerItem}>
-                  <p style={styles.bookmakerLabel}>Bet365</p>
-                  <p style={styles.bookmakerPrice}>{tip.odds?.bet365 || "—"}</p>
+              {tip.odds && (
+                <div style={styles.bookmakerRow}>
+                  <div style={styles.bookmakerItem}>
+                    <p>Bet365</p>
+                    <p style={styles.oddPrice}>{tip.odds.bet365 || "—"}</p>
+                  </div>
+                  <div style={styles.bookmakerItem}>
+                    <p>Toto</p>
+                    <p style={styles.oddPrice}>{tip.odds.toto || "—"}</p>
+                  </div>
+                  <div style={styles.bookmakerItem}>
+                    <p>BetCity</p>
+                    <p style={styles.oddPrice}>{tip.odds.betcity || "—"}</p>
+                  </div>
+                  <div style={styles.bookmakerItem}>
+                    <p>Unibet</p>
+                    <p style={styles.oddPrice}>{tip.odds.unibet || "—"}</p>
+                  </div>
                 </div>
-                <div style={styles.bookmakerItem}>
-                  <p style={styles.bookmakerLabel}>Toto</p>
-                  <p style={styles.bookmakerPrice}>{tip.odds?.toto || "—"}</p>
-                </div>
-                <div style={styles.bookmakerItem}>
-                  <p style={styles.bookmakerLabel}>BetCity</p>
-                  <p style={styles.bookmakerPrice}>{tip.odds?.betcity || "—"}</p>
-                </div>
-                <div style={styles.bookmakerItem}>
-                  <p style={styles.bookmakerLabel}>Unibet</p>
-                  <p style={styles.bookmakerPrice}>{tip.odds?.unibet || "—"}</p>
-                </div>
-              </div>
+              )}
             </div>
           ))}
         </div>
 
         {/* VERDUBBELAARS */}
         {results.data.parlay && results.data.parlay.length > 0 && (
-          <div style={styles.section}>
-            <h2 style={styles.sectionTitle("info")}>
-              <i className="ti ti-trending-up" style={styles.icon("info")} aria-hidden="true"></i>
-              3 Aanbevolen Verdubbelaars
-            </h2>
+          <div style={styles.riskSection}>
+            <h2 style={styles.riskTitle("info")}>💰 Aanbevolen Verdubbelaars</h2>
             {results.data.parlay.map((parlay) => (
               <div key={parlay.id} style={styles.parlayCard(parlay.risk)}>
-                <h3 style={styles.parlayTitle}>{parlay.id}. {parlay.name}</h3>
-                <p style={styles.parlayStrategy}>{parlay.why}</p>
+                <h3>{parlay.id}. {parlay.name}</h3>
+                <p>{parlay.why}</p>
                 <div style={styles.parlayBets}>
                   {parlay.bets && parlay.bets.map((bet, idx) => (
-                    <p key={idx} style={styles.parlayBet}>• {bet}</p>
+                    <p key={idx}>• {bet}</p>
                   ))}
                 </div>
                 <div style={styles.bookmakerRow}>
                   <div style={styles.bookmakerItem}>
-                    <p style={styles.bookmakerLabel}>Bet365</p>
-                    <p style={styles.bookmakerPrice}>{parlay.odds?.bet365 || "—"}</p>
+                    <p>Bet365</p>
+                    <p style={styles.oddPrice}>{parlay.odds?.bet365 || "—"}</p>
                   </div>
                   <div style={styles.bookmakerItem}>
-                    <p style={styles.bookmakerLabel}>Toto</p>
-                    <p style={styles.bookmakerPrice}>{parlay.odds?.toto || "—"}</p>
+                    <p>Toto</p>
+                    <p style={styles.oddPrice}>{parlay.odds?.toto || "—"}</p>
                   </div>
                   <div style={styles.bookmakerItem}>
-                    <p style={styles.bookmakerLabel}>BetCity</p>
-                    <p style={styles.bookmakerPrice}>{parlay.odds?.betcity || "—"}</p>
+                    <p>BetCity</p>
+                    <p style={styles.oddPrice}>{parlay.odds?.betcity || "—"}</p>
                   </div>
                   <div style={styles.bookmakerItem}>
-                    <p style={styles.bookmakerLabel}>Unibet</p>
-                    <p style={styles.bookmakerPrice}>{parlay.odds?.unibet || "—"}</p>
-                  </div>
-                </div>
-                <div style={styles.parlayStats}>
-                  <div style={styles.parlayStatBox}>
-                    <p style={styles.statLabel}>Winkans</p>
-                    <p style={styles.parlayValue}>{parlay.win_chance}%</p>
-                  </div>
-                  <div style={styles.parlayStatBox}>
-                    <p style={styles.statLabel}>Risico</p>
-                    <p style={styles.parlayValue}>{parlay.risk === "low" ? "Laag" : parlay.risk === "medium" ? "Gem." : "Hoog"}</p>
+                    <p>Unibet</p>
+                    <p style={styles.oddPrice}>{parlay.odds?.unibet || "—"}</p>
                   </div>
                 </div>
               </div>
@@ -215,78 +323,38 @@ export default function Home() {
     );
   };
 
+  const renderPoule = () => (
+    <div style={styles.pageContainer}>
+      <button onClick={() => setCurrentPage("home")} style={styles.backButton}>
+        ← Terug naar menu
+      </button>
+      <div style={styles.pageTitle}>📋 Poule & Uitslagen</div>
+      <div style={styles.infoBox}>
+        <p>Coming soon! 🚧</p>
+        <p>Hier zullen groepindelingen en uitslagen verschijnen.</p>
+      </div>
+    </div>
+  );
+
+  const renderStats = () => (
+    <div style={styles.pageContainer}>
+      <button onClick={() => setCurrentPage("home")} style={styles.backButton}>
+        ← Terug naar menu
+      </button>
+      <div style={styles.pageTitle}>🏆 Topscoorders & Statistieken</div>
+      <div style={styles.infoBox}>
+        <p>Coming soon! 🚧</p>
+        <p>Hier zullen topscoorders en statistieken verschijnen.</p>
+      </div>
+    </div>
+  );
+
   return (
     <div style={styles.container}>
-      <div style={styles.header}>
-        <h1 style={styles.title}>⚽ Voetbal Odds Analyzer</h1>
-        <p style={styles.subtitle}>AI-aangestuurde voetbal tips & odds analyse</p>
-      </div>
-
-      <div style={styles.controlPanel}>
-        <div style={styles.section}>
-          <label style={styles.label}>📍 Kies competitie:</label>
-          <select 
-            value={league} 
-            onChange={(e) => setLeague(e.target.value)}
-            style={styles.select}
-            disabled={loading}
-          >
-            <option value="la-liga">🇪🇸 La Liga (Spanje)</option>
-            <option value="premier-league">🇬🇧 Premier League (Engeland)</option>
-            <option value="serie-a">🇮🇹 Serie A (Italië)</option>
-            <option value="bundesliga">🇩🇪 Bundesliga (Duitsland)</option>
-            <option value="ligue-1">🇫🇷 Ligue 1 (Frankrijk)</option>
-            <option value="eredivisie">🇳🇱 Eredivisie (Nederland)</option>
-            <option value="mls">🇺🇸 MLS (Amerika)</option>
-            <option value="wk-2026">🏆 WK 2026</option>
-          </select>
-        </div>
-
-        <div style={styles.section}>
-          <label style={styles.label}>📅 Kies datum:</label>
-          <input 
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            style={styles.select}
-            disabled={loading}
-          />
-        </div>
-
-        <div style={styles.buttonGroup}>
-          <button 
-            onClick={handleBestOdds}
-            disabled={loading}
-            style={{...styles.button, ...styles.buttonPrimary}}
-          >
-            {loading ? "⏳ Laden..." : "💰 Beste odds"}
-          </button>
-        </div>
-      </div>
-
-      {error && (
-        <div style={styles.errorBox}>
-          ⚠️ {error}
-        </div>
-      )}
-
-      {results && renderTips()}
-
-      {!results && !loading && !error && (
-        <div style={styles.infoBox}>
-          <h2>ℹ️ Hoe werkt het?</h2>
-          <ul>
-            <li>Selecteer je favoriete competitie</li>
-            <li>Kies een datum</li>
-            <li>Klik "Beste odds" voor AI-analyse</li>
-            <li>Claude zoekt real-time wedstrijden en odds</li>
-            <li>15 tips + 3 verdubbelaars met echte bookmaker odds</li>
-          </ul>
-          <p style={styles.disclaimer}>
-            ⚠️ <strong>Disclaimer:</strong> Dit zijn AI-gebaseerde analyses. Verifieer altijd bij je bookmaker. Speel verantwoord — 18+.
-          </p>
-        </div>
-      )}
+      {currentPage === "home" && renderHome()}
+      {currentPage === "betting" && renderBetting()}
+      {currentPage === "poule" && renderPoule()}
+      {currentPage === "stats" && renderStats()}
     </div>
   );
 }
@@ -294,185 +362,326 @@ export default function Home() {
 const styles = {
   container: {
     minHeight: "100vh",
-    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    background: "linear-gradient(135deg, #1a472a 0%, #2d5a3d 25%, #1e3a52 50%, #2d3e5a 75%, #1a2d3a 100%)",
+    backgroundAttachment: "fixed",
     padding: "20px",
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+    position: "relative",
+    overflow: "hidden"
   },
-  header: {
+
+  // HOME PAGE
+  homeContainer: {
+    minHeight: "100vh",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center"
+  },
+
+  heroSection: {
     textAlign: "center",
     color: "white",
-    marginBottom: "40px",
-    paddingTop: "20px"
+    marginBottom: "60px",
+    zIndex: 2,
+    position: "relative"
   },
-  title: {
-    fontSize: "42px",
-    margin: "0 0 10px 0",
-    fontWeight: "700"
+
+  heroTitle: {
+    fontSize: "48px",
+    fontWeight: "800",
+    margin: "0 0 10px",
+    textShadow: "0 4px 10px rgba(0,0,0,0.5)",
+    letterSpacing: "2px"
   },
-  subtitle: {
-    fontSize: "16px",
+
+  heroSubtitle: {
+    fontSize: "18px",
+    opacity: "0.9",
     margin: "0",
-    opacity: "0.9"
+    textShadow: "0 2px 5px rgba(0,0,0,0.3)"
   },
-  controlPanel: {
-    maxWidth: "800px",
-    margin: "0 auto 30px",
-    backgroundColor: "white",
+
+  menuGrid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "25px",
+    maxWidth: "900px",
+    margin: "0 auto",
+    zIndex: 2
+  },
+
+  menuButton: (gradientType) => {
+    const gradients = {
+      gradient1: "linear-gradient(135deg, #FF6B6B 0%, #EE5A6F 100%)",
+      gradient2: "linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%)",
+      gradient3: "linear-gradient(135deg, #FFD93D 0%, #FF9E1B 100%)",
+      gradient4: "linear-gradient(135deg, #6C5CE7 0%, #A29BFE 100%)"
+    };
+
+    return {
+      background: gradients[gradientType],
+      border: "none",
+      borderRadius: "16px",
+      padding: "40px 25px",
+      cursor: "pointer",
+      color: "white",
+      textAlign: "center",
+      transition: "all 0.3s ease",
+      boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+      transform: "translateY(0)",
+      aspectRatio: "1",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+      ":hover": {
+        transform: "translateY(-5px)",
+        boxShadow: "0 15px 40px rgba(0,0,0,0.4)"
+      }
+    };
+  },
+
+  menuIcon: {
+    fontSize: "48px",
+    marginBottom: "15px"
+  },
+
+  menuTitle: {
+    fontSize: "20px",
+    fontWeight: "700",
+    margin: "0 0 10px",
+    textShadow: "0 2px 4px rgba(0,0,0,0.2)"
+  },
+
+  menuDesc: {
+    fontSize: "13px",
+    opacity: "0.95",
+    margin: "0",
+    textShadow: "0 1px 2px rgba(0,0,0,0.2)"
+  },
+
+  menuPrice: {
+    fontSize: "12px",
+    marginTop: "10px",
+    opacity: "0.85",
+    fontWeight: "600"
+  },
+
+  footerHome: {
+    marginTop: "60px",
+    color: "white",
+    textAlign: "center",
+    opacity: "0.8",
+    fontSize: "14px"
+  },
+
+  // PAGE CONTAINER
+  pageContainer: {
+    maxWidth: "900px",
+    margin: "0 auto",
+    position: "relative",
+    zIndex: 2
+  },
+
+  backButton: {
+    background: "rgba(255,255,255,0.1)",
+    border: "2px solid white",
+    color: "white",
+    padding: "10px 20px",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "600",
+    marginBottom: "20px",
+    transition: "all 0.3s",
+    ":hover": {
+      background: "rgba(255,255,255,0.2)"
+    }
+  },
+
+  bettingHeader: {
+    background: "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)",
+    border: "2px solid rgba(255,255,255,0.2)",
     borderRadius: "12px",
-    padding: "30px",
-    boxShadow: "0 10px 40px rgba(0,0,0,0.2)"
+    padding: "25px",
+    color: "white",
+    marginBottom: "25px",
+    backdropFilter: "blur(10px)"
   },
+
+  pageTitle: {
+    fontSize: "28px",
+    fontWeight: "700",
+    color: "white",
+    marginBottom: "25px",
+    textShadow: "0 2px 5px rgba(0,0,0,0.3)"
+  },
+
+  controlPanel: {
+    background: "white",
+    borderRadius: "12px",
+    padding: "25px",
+    marginBottom: "25px",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.2)"
+  },
+
   section: {
-    marginBottom: "25px"
+    marginBottom: "20px"
   },
+
   label: {
     display: "block",
-    marginBottom: "10px",
+    marginBottom: "8px",
     fontWeight: "600",
     color: "#333",
-    fontSize: "16px"
+    fontSize: "14px"
   },
+
   select: {
     width: "100%",
     padding: "12px",
-    fontSize: "16px",
+    fontSize: "14px",
     borderRadius: "8px",
-    border: "2px solid #667eea",
+    border: "2px solid #4ECDC4",
     backgroundColor: "white",
     color: "#333",
     cursor: "pointer"
   },
-  buttonGroup: {
-    display: "flex",
-    gap: "15px",
-    marginTop: "25px"
-  },
-  button: {
-    padding: "16px",
+
+  analyzeButton: {
+    width: "100%",
+    padding: "14px",
     fontSize: "16px",
-    fontWeight: "600",
+    fontWeight: "700",
     border: "none",
     borderRadius: "8px",
-    cursor: "pointer",
+    background: "linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%)",
     color: "white",
-    flex: 1
+    cursor: "pointer",
+    transition: "all 0.3s",
+    boxShadow: "0 5px 15px rgba(0,0,0,0.2)"
   },
-  buttonPrimary: {
-    backgroundColor: "#667eea"
-  },
+
   errorBox: {
-    maxWidth: "800px",
-    margin: "0 auto 20px",
-    backgroundColor: "#fee",
-    color: "#c33",
+    background: "#FFE0E0",
+    color: "#C33",
     padding: "16px",
     borderRadius: "8px",
-    border: "2px solid #f99"
+    marginBottom: "20px",
+    border: "2px solid #F99"
   },
-  tipsContainer: {
-    maxWidth: "800px",
-    margin: "0 auto",
-    backgroundColor: "white",
+
+  infoBox: {
+    background: "white",
     borderRadius: "12px",
-    padding: "30px",
-    boxShadow: "0 10px 40px rgba(0,0,0,0.2)"
+    padding: "25px",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+    color: "#333"
   },
+
+  tipsContainer: {
+    background: "white",
+    borderRadius: "12px",
+    padding: "25px",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.2)"
+  },
+
   statsRow: {
     display: "grid",
     gridTemplateColumns: "1fr 1fr 1fr",
     gap: "12px",
-    marginBottom: "30px"
+    marginBottom: "25px"
   },
+
   statCard: (type) => ({
     background: type === "success" ? "#E8F5E9" : type === "warning" ? "#FFF3E0" : "#FFEBEE",
     borderRadius: "8px",
     padding: "12px",
-    textAlign: "center"
+    textAlign: "center",
+    color: type === "success" ? "#2E7D32" : type === "warning" ? "#E65100" : "#C62828"
   }),
-  statLabel: {
-    fontSize: "12px",
-    margin: "0",
-    fontWeight: "500",
-    color: "#666"
-  },
+
   statValue: {
     fontSize: "20px",
-    margin: "4px 0 0",
-    fontWeight: "500",
-    color: "#333"
+    fontWeight: "700",
+    margin: "8px 0 0"
   },
-  sectionTitle: (type) => ({
+
+  riskSection: {
+    marginBottom: "30px"
+  },
+
+  riskTitle: (type) => ({
     fontSize: "16px",
-    fontWeight: "500",
-    color: "#333",
-    margin: "0 0 12px",
-    display: "flex",
-    alignItems: "center",
-    gap: "8px"
+    fontWeight: "700",
+    color: type === "success" ? "#2E7D32" : type === "warning" ? "#E65100" : type === "danger" ? "#C62828" : "#1565C0",
+    margin: "0 0 15px",
+    paddingBottom: "10px",
+    borderBottom: `3px solid ${type === "success" ? "#4CAF50" : type === "warning" ? "#FF9800" : type === "danger" ? "#F44336" : "#2196F3"}`
   }),
-  icon: (type) => ({
-    fontSize: "20px",
-    color: type === "success" ? "#4CAF50" : type === "warning" ? "#FF9800" : type === "danger" ? "#F44336" : "#2196F3"
-  }),
+
   tipCard: {
-    background: "white",
-    border: "0.5px solid #e0e0e0",
+    background: "#F9F9F9",
+    border: "1px solid #E0E0E0",
     borderRadius: "8px",
     padding: "16px",
     marginBottom: "12px"
   },
+
   tipTitle: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: "8px"
   },
+
   matchVs: {
     fontSize: "15px",
-    fontWeight: "600",
+    fontWeight: "700",
     color: "#333",
     margin: "0",
     flex: 1
   },
-  winChanceMain: {
+
+  winChance: {
     fontSize: "14px",
-    fontWeight: "600",
+    fontWeight: "700",
     color: "#4CAF50",
     margin: "0",
     marginLeft: "12px"
   },
+
   tipBio: {
     fontSize: "12px",
     color: "#666",
     margin: "0 0 12px",
-    lineHeight: "1.4"
+    lineHeight: "1.5"
   },
+
   bookmakerRow: {
     display: "grid",
     gridTemplateColumns: "1fr 1fr 1fr 1fr",
-    gap: "10px",
+    gap: "8px",
     paddingTop: "12px",
-    borderTop: "1px solid #e0e0e0"
+    borderTop: "1px solid #E0E0E0"
   },
+
   bookmakerItem: {
     textAlign: "center",
-    background: "#f9f9f9",
+    background: "#F0F0F0",
     borderRadius: "6px",
-    padding: "10px",
-    border: "1px solid #e0e0e0"
+    padding: "8px",
+    fontSize: "11px"
   },
-  bookmakerLabel: {
-    fontSize: "11px",
-    color: "#666",
-    margin: "0 0 6px",
-    fontWeight: "500"
-  },
-  bookmakerPrice: {
-    fontSize: "16px",
+
+  oddPrice: {
+    fontSize: "14px",
     fontWeight: "700",
     color: "#333",
-    margin: "0"
+    margin: "4px 0 0"
   },
+
   parlayCard: (risk) => ({
     background: risk === "low" ? "#E3F2FD" : risk === "medium" ? "#FFF8E1" : "#FFEBEE",
     border: `2px solid ${risk === "low" ? "#2196F3" : risk === "medium" ? "#FBC02D" : "#F44336"}`,
@@ -480,61 +689,11 @@ const styles = {
     padding: "16px",
     marginBottom: "12px"
   }),
-  parlayTitle: {
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "#333",
-    margin: "0 0 8px"
-  },
-  parlayStrategy: {
-    fontSize: "12px",
-    color: "#666",
-    margin: "0 0 12px",
-    lineHeight: "1.4"
-  },
+
   parlayBets: {
-    background: "rgba(255,255,255,0.6)",
-    borderRadius: "6px",
-    padding: "10px",
-    marginBottom: "12px"
-  },
-  parlayBet: {
     fontSize: "12px",
     color: "#333",
-    margin: "4px 0"
-  },
-  parlayStats: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: "10px",
-    marginTop: "12px"
-  },
-  parlayStatBox: {
-    background: "rgba(255,255,255,0.5)",
-    borderRadius: "6px",
-    padding: "8px",
-    textAlign: "center"
-  },
-  parlayValue: {
-    fontSize: "16px",
-    fontWeight: "600",
-    color: "#333",
-    margin: "2px 0 0"
-  },
-  infoBox: {
-    maxWidth: "800px",
-    margin: "0 auto",
-    backgroundColor: "white",
-    borderRadius: "12px",
-    padding: "30px",
-    boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
-    color: "#333"
-  },
-  disclaimer: {
-    marginTop: "15px",
-    padding: "15px",
-    backgroundColor: "#fff3cd",
-    borderLeft: "4px solid #ffc107",
-    fontSize: "13px"
+    margin: "10px 0",
+    lineHeight: "1.6"
   }
 };
