@@ -15,7 +15,7 @@ export default async (req, res) => {
 
 JE TAAK:
 1. Zoek de werkelijke voetbalwedstrijden voor ${date} in ${league === 'wk-2026' ? 'WK 2026' : league}
-2. Zoek de ECHTE odds van bookmakers (Bet365, DraftKings, etc) voor die wedstrijden
+2. Voor ELKE wedstrijd, zoek ECHTE odds van Bet365, Toto, BetCity, en Unibet
 3. Analyseer die data en geef JSON terug
 
 RESPONSE FORMAT (ALTIJD deze structuur):
@@ -24,10 +24,16 @@ RESPONSE FORMAT (ALTIJD deze structuur):
     "low_risk": [
       {
         "id": 1,
-        "bet": "Exact bet naam (bijv: Mexico wint vs Indonesië)",
-        "odds": 1.25,
+        "bet": "TEAM A VS TEAM B (Bet type). Bijv: Mexico VS Indonesië (Mexico Wint)",
+        "why": "Korte reden (1-2 zinnen)",
         "win_chance": 85,
-        "why": "Korte reden (1-2 zinnen)"
+        "odds": {
+          "bet365": 1.25,
+          "toto": 1.23,
+          "betcity": 1.24,
+          "unibet": 1.27
+        },
+        "best_odds": 1.27
       }
     ],
     "medium_risk": [...],
@@ -36,41 +42,58 @@ RESPONSE FORMAT (ALTIJD deze structuur):
   "parlay": [
     {
       "id": 1,
-      "name": "Naam",
+      "name": "Veilige Dubbel",
       "bets": ["Bet 1", "Bet 2"],
-      "odds": 2.50,
+      "why": "Korte strategie",
       "win_chance": 50,
-      "strategy": "Korte strategie",
+      "odds": {
+        "bet365": 2.50,
+        "toto": 2.45,
+        "betcity": 2.48,
+        "unibet": 2.55
+      },
+      "best_odds": 2.55,
       "risk": "low"
     }
   ]
 }
 
-CRITICAL:
-- LOW RISK: 5 tips, 70%+, ECHTE ODDS
-- MEDIUM RISK: 5 tips, 55-70%, ECHTE ODDS
-- HIGH RISK: 5 tips, <55%, ECHTE ODDS
-- PARLAY: 3 verdubbelaars met ECHTE ODDS
-- GEBRUIK WEB SEARCH VOOR ALLES
+CRITICAL RULES:
+- LOW RISK: 5 tips, 70%+
+- MEDIUM RISK: 5 tips, 55-70%
+- HIGH RISK: 5 tips, <55%
+- PARLAY: 3 verdubbelaars (1 laag, 1 gemiddeld, 1 hoog)
+- VOOR ELKE BET: Include Bet365, Toto, BetCity, Unibet odds
+- "best_odds" = highest odds van de 4
+- Bet format: "TEAM A VS TEAM B (Bet type)"
 - "why" max 2 zinnen
-- ALTIJD VALID JSON`;
+- ALTIJD VALID JSON, geen extra tekst`;
 
     let userPrompt;
 
     if (league === "wk-2026") {
       userPrompt = `Analyseer WK 2026 wedstrijden van ${date}.
 
-STAP 1: Zoek alle WK 2026 wedstrijden die op ${date} gespeeld worden
-STAP 2: Zoek voor ELKE wedstrijd de ECHTE odds (Home/Away/Draw) van minstens 3 bookmakers
-STAP 3: Geef 15 betting tips (5 laag + 5 gemiddeld + 5 hoog risico) + 3 verdubbelaars in JSON
+STAP 1: Zoek ALLE WK 2026 wedstrijden op ${date}
+STAP 2: Voor ELKE wedstrijd, zoek ECHTE odds van:
+        - Bet365
+        - Toto
+        - BetCity
+        - Unibet
+STAP 3: Geef 15 betting tips (5 laag + 5 gemiddeld + 5 hoog) + 3 verdubbelaars in JSON
+
+Format bet: "TEAM A VS TEAM B (Bet type)"
+Bijv: "Mexico VS Indonesië (Mexico Wint)"
 
 GEBRUIK WEB SEARCH VOOR ALLES!`;
     } else {
       userPrompt = `Analyseer voetbalwedstrijden van ${date} in ${league}.
 
 STAP 1: Zoek alle wedstrijden op die datum
-STAP 2: Zoek ECHTE odds voor die matches
-STAP 3: Geef 15 tips + 3 verdubbelaars in JSON
+STAP 2: Voor ELKE wedstrijd, zoek odds van Bet365, Toto, BetCity, Unibet
+STAP 3: Geef 15 tips + 3 verdubbelaars in JSON met ALLE bookmaker odds
+
+Format: "TEAM A VS TEAM B (Bet type)"
 
 GEBRUIK WEB SEARCH!`;
     }
@@ -102,7 +125,6 @@ GEBRUIK WEB SEARCH!`;
       throw new Error(`Claude API error: ${data.error?.message || "Unknown"}`);
     }
 
-    // Extract text from response
     let rawText = "";
     if (data.content) {
       for (const block of data.content) {
