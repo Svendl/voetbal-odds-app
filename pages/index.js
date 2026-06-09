@@ -66,14 +66,27 @@ export default function Home() {
           </h2>
           {low_risk && low_risk.map((tip) => (
             <div key={tip.id} style={styles.tipCard}>
-              <div style={styles.tipHeader}>
-                <div style={styles.tipInfo}>
-                  <p style={styles.tipBet}>{tip.bet}</p>
-                  <p style={styles.tipDesc}>{tip.why}</p>
+              <div style={styles.tipTitle}>
+                <h3 style={styles.matchVs}>{tip.bet}</h3>
+                <p style={styles.winChanceMain}>{tip.win_chance}%</p>
+              </div>
+              <p style={styles.tipBio}>{tip.why}</p>
+              <div style={styles.bookmakerRow}>
+                <div style={styles.bookmakerItem}>
+                  <p style={styles.bookmakerLabel}>Bet365</p>
+                  <p style={styles.bookmakerPrice}>{tip.odds?.bet365 || "—"}</p>
                 </div>
-                <div style={styles.tipOdds}>
-                  <p style={styles.oddsValue}>{tip.odds}</p>
-                  <p style={styles.winkans("success")}>{tip.win_chance}%</p>
+                <div style={styles.bookmakerItem}>
+                  <p style={styles.bookmakerLabel}>Toto</p>
+                  <p style={styles.bookmakerPrice}>{tip.odds?.toto || "—"}</p>
+                </div>
+                <div style={styles.bookmakerItem}>
+                  <p style={styles.bookmakerLabel}>BetCity</p>
+                  <p style={styles.bookmakerPrice}>{tip.odds?.betcity || "—"}</p>
+                </div>
+                <div style={styles.bookmakerItem}>
+                  <p style={styles.bookmakerLabel}>Unibet</p>
+                  <p style={styles.bookmakerPrice}>{tip.odds?.unibet || "—"}</p>
                 </div>
               </div>
             </div>
@@ -88,14 +101,27 @@ export default function Home() {
           </h2>
           {medium_risk && medium_risk.map((tip) => (
             <div key={tip.id} style={styles.tipCard}>
-              <div style={styles.tipHeader}>
-                <div style={styles.tipInfo}>
-                  <p style={styles.tipBet}>{tip.bet}</p>
-                  <p style={styles.tipDesc}>{tip.why}</p>
+              <div style={styles.tipTitle}>
+                <h3 style={styles.matchVs}>{tip.bet}</h3>
+                <p style={styles.winChanceMain}>{tip.win_chance}%</p>
+              </div>
+              <p style={styles.tipBio}>{tip.why}</p>
+              <div style={styles.bookmakerRow}>
+                <div style={styles.bookmakerItem}>
+                  <p style={styles.bookmakerLabel}>Bet365</p>
+                  <p style={styles.bookmakerPrice}>{tip.odds?.bet365 || "—"}</p>
                 </div>
-                <div style={styles.tipOdds}>
-                  <p style={styles.oddsValue}>{tip.odds}</p>
-                  <p style={styles.winkans("warning")}>{tip.win_chance}%</p>
+                <div style={styles.bookmakerItem}>
+                  <p style={styles.bookmakerLabel}>Toto</p>
+                  <p style={styles.bookmakerPrice}>{tip.odds?.toto || "—"}</p>
+                </div>
+                <div style={styles.bookmakerItem}>
+                  <p style={styles.bookmakerLabel}>BetCity</p>
+                  <p style={styles.bookmakerPrice}>{tip.odds?.betcity || "—"}</p>
+                </div>
+                <div style={styles.bookmakerItem}>
+                  <p style={styles.bookmakerLabel}>Unibet</p>
+                  <p style={styles.bookmakerPrice}>{tip.odds?.unibet || "—"}</p>
                 </div>
               </div>
             </div>
@@ -110,14 +136,27 @@ export default function Home() {
           </h2>
           {high_risk && high_risk.map((tip) => (
             <div key={tip.id} style={styles.tipCard}>
-              <div style={styles.tipHeader}>
-                <div style={styles.tipInfo}>
-                  <p style={styles.tipBet}>{tip.bet}</p>
-                  <p style={styles.tipDesc}>{tip.why}</p>
+              <div style={styles.tipTitle}>
+                <h3 style={styles.matchVs}>{tip.bet}</h3>
+                <p style={styles.winChanceMain}>{tip.win_chance}%</p>
+              </div>
+              <p style={styles.tipBio}>{tip.why}</p>
+              <div style={styles.bookmakerRow}>
+                <div style={styles.bookmakerItem}>
+                  <p style={styles.bookmakerLabel}>Bet365</p>
+                  <p style={styles.bookmakerPrice}>{tip.odds?.bet365 || "—"}</p>
                 </div>
-                <div style={styles.tipOdds}>
-                  <p style={styles.oddsValue}>{tip.odds}</p>
-                  <p style={styles.winkans("danger")}>{tip.win_chance}%</p>
+                <div style={styles.bookmakerItem}>
+                  <p style={styles.bookmakerLabel}>Toto</p>
+                  <p style={styles.bookmakerPrice}>{tip.odds?.toto || "—"}</p>
+                </div>
+                <div style={styles.bookmakerItem}>
+                  <p style={styles.bookmakerLabel}>BetCity</p>
+                  <p style={styles.bookmakerPrice}>{tip.odds?.betcity || "—"}</p>
+                </div>
+                <div style={styles.bookmakerItem}>
+                  <p style={styles.bookmakerLabel}>Unibet</p>
+                  <p style={styles.bookmakerPrice}>{tip.odds?.unibet || "—"}</p>
                 </div>
               </div>
             </div>
@@ -134,16 +173,31 @@ export default function Home() {
             {results.data.parlay.map((parlay) => (
               <div key={parlay.id} style={styles.parlayCard(parlay.risk)}>
                 <h3 style={styles.parlayTitle}>{parlay.id}. {parlay.name}</h3>
+                <p style={styles.parlayStrategy}>{parlay.why}</p>
                 <div style={styles.parlayBets}>
                   {parlay.bets && parlay.bets.map((bet, idx) => (
-                    <p key={idx} style={styles.parlayBet}>{bet}</p>
+                    <p key={idx} style={styles.parlayBet}>• {bet}</p>
                   ))}
                 </div>
-                <div style={styles.parlayStats}>
-                  <div style={styles.parlayStatBox}>
-                    <p style={styles.statLabel}>Odds</p>
-                    <p style={styles.parlayValue}>{parlay.odds}</p>
+                <div style={styles.bookmakerRow}>
+                  <div style={styles.bookmakerItem}>
+                    <p style={styles.bookmakerLabel}>Bet365</p>
+                    <p style={styles.bookmakerPrice}>{parlay.odds?.bet365 || "—"}</p>
                   </div>
+                  <div style={styles.bookmakerItem}>
+                    <p style={styles.bookmakerLabel}>Toto</p>
+                    <p style={styles.bookmakerPrice}>{parlay.odds?.toto || "—"}</p>
+                  </div>
+                  <div style={styles.bookmakerItem}>
+                    <p style={styles.bookmakerLabel}>BetCity</p>
+                    <p style={styles.bookmakerPrice}>{parlay.odds?.betcity || "—"}</p>
+                  </div>
+                  <div style={styles.bookmakerItem}>
+                    <p style={styles.bookmakerLabel}>Unibet</p>
+                    <p style={styles.bookmakerPrice}>{parlay.odds?.unibet || "—"}</p>
+                  </div>
+                </div>
+                <div style={styles.parlayStats}>
                   <div style={styles.parlayStatBox}>
                     <p style={styles.statLabel}>Winkans</p>
                     <p style={styles.parlayValue}>{parlay.win_chance}%</p>
@@ -153,7 +207,6 @@ export default function Home() {
                     <p style={styles.parlayValue}>{parlay.risk === "low" ? "Laag" : parlay.risk === "medium" ? "Gem." : "Hoog"}</p>
                   </div>
                 </div>
-                <p style={styles.parlayStrategy}><strong>Strategie:</strong> {parlay.strategy}</p>
               </div>
             ))}
           </div>
@@ -226,8 +279,8 @@ export default function Home() {
             <li>Selecteer je favoriete competitie</li>
             <li>Kies een datum</li>
             <li>Klik "Beste odds" voor AI-analyse</li>
-            <li>Claude geeft 15 tips + 3 verdubbelaars</li>
-            <li>Risicoclassificatie: Laag/Gemiddeld/Hoog</li>
+            <li>Claude zoekt real-time wedstrijden en odds</li>
+            <li>15 tips + 3 verdubbelaars met echte bookmaker odds</li>
           </ul>
           <p style={styles.disclaimer}>
             ⚠️ <strong>Disclaimer:</strong> Dit zijn AI-gebaseerde analyses. Verifieer altijd bij je bookmaker. Speel verantwoord — 18+.
@@ -366,42 +419,60 @@ const styles = {
     border: "0.5px solid #e0e0e0",
     borderRadius: "8px",
     padding: "16px",
-    marginBottom: "10px"
+    marginBottom: "12px"
   },
-  tipHeader: {
+  tipTitle: {
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "flex-start"
+    alignItems: "center",
+    marginBottom: "8px"
   },
-  tipInfo: {
+  matchVs: {
+    fontSize: "15px",
+    fontWeight: "600",
+    color: "#333",
+    margin: "0",
     flex: 1
   },
-  tipBet: {
-    fontSize: "15px",
-    fontWeight: "500",
-    color: "#333",
-    margin: "0"
+  winChanceMain: {
+    fontSize: "14px",
+    fontWeight: "600",
+    color: "#4CAF50",
+    margin: "0",
+    marginLeft: "12px"
   },
-  tipDesc: {
+  tipBio: {
     fontSize: "12px",
     color: "#666",
-    margin: "6px 0 0"
+    margin: "0 0 12px",
+    lineHeight: "1.4"
   },
-  tipOdds: {
-    textAlign: "right",
-    marginLeft: "16px"
+  bookmakerRow: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr 1fr 1fr",
+    gap: "10px",
+    paddingTop: "12px",
+    borderTop: "1px solid #e0e0e0"
   },
-  oddsValue: {
+  bookmakerItem: {
+    textAlign: "center",
+    background: "#f9f9f9",
+    borderRadius: "6px",
+    padding: "10px",
+    border: "1px solid #e0e0e0"
+  },
+  bookmakerLabel: {
+    fontSize: "11px",
+    color: "#666",
+    margin: "0 0 6px",
+    fontWeight: "500"
+  },
+  bookmakerPrice: {
     fontSize: "16px",
-    fontWeight: "500",
+    fontWeight: "700",
     color: "#333",
     margin: "0"
   },
-  winkans: (type) => ({
-    fontSize: "11px",
-    margin: "2px 0 0",
-    color: type === "success" ? "#4CAF50" : type === "warning" ? "#FF9800" : "#F44336"
-  }),
   parlayCard: (risk) => ({
     background: risk === "low" ? "#E3F2FD" : risk === "medium" ? "#FFF8E1" : "#FFEBEE",
     border: `2px solid ${risk === "low" ? "#2196F3" : risk === "medium" ? "#FBC02D" : "#F44336"}`,
@@ -411,9 +482,15 @@ const styles = {
   }),
   parlayTitle: {
     fontSize: "14px",
-    fontWeight: "500",
+    fontWeight: "600",
     color: "#333",
-    margin: "0 0 12px"
+    margin: "0 0 8px"
+  },
+  parlayStrategy: {
+    fontSize: "12px",
+    color: "#666",
+    margin: "0 0 12px",
+    lineHeight: "1.4"
   },
   parlayBets: {
     background: "rgba(255,255,255,0.6)",
@@ -428,9 +505,9 @@ const styles = {
   },
   parlayStats: {
     display: "grid",
-    gridTemplateColumns: "1fr 1fr 1fr",
+    gridTemplateColumns: "1fr 1fr",
     gap: "10px",
-    marginBottom: "12px"
+    marginTop: "12px"
   },
   parlayStatBox: {
     background: "rgba(255,255,255,0.5)",
@@ -440,15 +517,9 @@ const styles = {
   },
   parlayValue: {
     fontSize: "16px",
-    fontWeight: "500",
+    fontWeight: "600",
     color: "#333",
     margin: "2px 0 0"
-  },
-  parlayStrategy: {
-    fontSize: "12px",
-    color: "#333",
-    margin: "0",
-    lineHeight: "1.5"
   },
   infoBox: {
     maxWidth: "800px",
