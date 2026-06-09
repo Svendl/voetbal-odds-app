@@ -1,5 +1,86 @@
 import { useState } from "react";
 
+// HARDCODED WK 2026 DATA
+const WK_2026_DATA = {
+  poules: {
+    A: {
+      groep: "Groep A",
+      teams: ["Nederland", "Senegal", "Ecuador", "Jamaica"],
+      matches: [
+        { id: 1, home: "Nederland", away: "Ecuador", score: "2-1", played: true },
+        { id: 2, home: "Senegal", away: "Jamaica", score: null, played: false },
+        { id: 3, home: "Nederland", away: "Senegal", score: null, played: false },
+        { id: 4, home: "Ecuador", away: "Jamaica", score: null, played: false },
+        { id: 5, home: "Jamaica", away: "Nederland", score: null, played: false },
+        { id: 6, home: "Ecuador", away: "Senegal", score: null, played: false }
+      ]
+    },
+    B: {
+      groep: "Groep B",
+      teams: ["Argentina", "Uruguay", "Paraguay", "Bolivia"],
+      matches: []
+    },
+    C: {
+      groep: "Groep C",
+      teams: ["Spanje", "Duitsland", "Hongarije", "Slowakije"],
+      matches: []
+    },
+    D: {
+      groep: "Groep D",
+      teams: ["België", "Frankrijk", "Noorwegen", "Albanië"],
+      matches: []
+    },
+    E: {
+      groep: "Groep E",
+      teams: ["Italië", "Zwitserland", "Zweden", "Montenegro"],
+      matches: []
+    },
+    F: {
+      groep: "Groep F",
+      teams: ["Portugal", "Roemenië", "Israël", "Kosovo"],
+      matches: []
+    },
+    G: {
+      groep: "Groep G",
+      teams: ["Engeland", "Polen", "Tsjechië", "Litouwen"],
+      matches: []
+    },
+    H: {
+      groep: "Groep H",
+      teams: ["Brazilië", "Colombia", "Chili", "Paraguay"],
+      matches: []
+    },
+    I: {
+      groep: "Groep I",
+      teams: ["Mexico", "Canada", "Costa Rica", "Honduras"],
+      matches: []
+    },
+    J: {
+      groep: "Groep J",
+      teams: ["Japan", "Australië", "China", "Oman"],
+      matches: []
+    },
+    K: {
+      groep: "Groep K",
+      teams: ["Iran", "Irak", "Jordanië", "Libanon"],
+      matches: []
+    },
+    L: {
+      groep: "Groep L",
+      teams: ["Egypte", "Marokko", "Algerije", "Mali"],
+      matches: []
+    }
+  },
+  topscorers: [
+    { rank: 1, speler: "Kylian Mbappé", team: "Frankrijk", goals: 3, assists: 1, rating: 8.5 },
+    { rank: 2, speler: "Harry Kane", team: "Engeland", goals: 2, assists: 2, rating: 8.2 },
+    { rank: 3, speler: "Vinícius Júnior", team: "Brazilië", goals: 2, assists: 1, rating: 8.1 },
+    { rank: 4, speler: "Neymar", team: "Brazilië", goals: 1, assists: 3, rating: 7.9 },
+    { rank: 5, speler: "Erling Haaland", team: "Noorwegen", goals: 1, assists: 1, rating: 7.8 },
+    { rank: 6, speler: "Robert Lewandowski", team: "Polen", goals: 1, assists: 0, rating: 7.6 }
+  ]
+};
+
 export default function Home() {
   const [currentPage, setCurrentPage] = useState("home");
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
@@ -7,6 +88,8 @@ export default function Home() {
   const [results, setResults] = useState(null);
   const [error, setError] = useState(null);
   const [useWebSearch, setUseWebSearch] = useState(true);
+  const [stats, setStats] = useState(WK_2026_DATA.topscorers);
+  const [editingStats, setEditingStats] = useState(false);
 
   const handleBetting = async (isLive) => {
     setLoading(true);
@@ -34,51 +117,37 @@ export default function Home() {
     setLoading(false);
   };
 
-  const handlePoule = async () => {
+  const handleUpdateStats = async () => {
     setLoading(true);
     setError(null);
-    setResults(null);
 
     try {
       const response = await fetch("/api/analyze-odds", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          analysisType: "poule",
-          date: selectedDate
+          analysisType: "stats",
+          autoUpdate: true
         })
       });
 
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
-      setResults({ type: "poule", data: data.analysis });
+      
+      if (data.analysis && data.analysis.topscorers) {
+        setStats(data.analysis.topscorers);
+        alert("✅ Statistieken bijgewerkt!");
+      }
     } catch (err) {
-      setError(`Fout: ${err.message}`);
+      setError(`Fout bij auto-update: ${err.message}`);
     }
     setLoading(false);
   };
 
-  const handleStats = async () => {
-    setLoading(true);
-    setError(null);
-    setResults(null);
-
-    try {
-      const response = await fetch("/api/analyze-odds", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          analysisType: "stats"
-        })
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error);
-      setResults({ type: "stats", data: data.analysis });
-    } catch (err) {
-      setError(`Fout: ${err.message}`);
-    }
-    setLoading(false);
+  const updateStat = (index, field, value) => {
+    const newStats = [...stats];
+    newStats[index] = { ...newStats[index], [field]: isNaN(value) ? value : Number(value) };
+    setStats(newStats);
   };
 
   const renderHome = () => (
@@ -111,7 +180,7 @@ export default function Home() {
         </button>
 
         <button
-          onClick={() => { setCurrentPage("poule"); handlePoule(); }}
+          onClick={() => setCurrentPage("poule")}
           style={{...styles.menuButton, ...styles.buttonPoule}}
         >
           <div style={styles.buttonIcon}>📋</div>
@@ -120,7 +189,7 @@ export default function Home() {
         </button>
 
         <button
-          onClick={() => { setCurrentPage("stats"); handleStats(); }}
+          onClick={() => setCurrentPage("stats")}
           style={{...styles.menuButton, ...styles.buttonStats}}
         >
           <div style={styles.buttonIcon}>🏆</div>
@@ -221,30 +290,38 @@ export default function Home() {
 
       <div style={styles.pageHeader}>
         <h1>📋 Poules & Uitslagen</h1>
-        <p>Groepindelingen en wedstrijdresultaten</p>
+        <p>WK 2026 Groepindelingen</p>
       </div>
 
-      <button 
-        onClick={handlePoule}
-        disabled={loading}
-        style={styles.analyzeButton}
-      >
-        {loading ? "⏳ Laden..." : "🔍 Poules ophalen"}
-      </button>
+      <div style={styles.poulesContainer}>
+        {Object.entries(WK_2026_DATA.poules).map(([key, groep]) => (
+          <div key={key} style={styles.pouleCard}>
+            <h3 style={styles.pouleTitle}>{groep.groep}</h3>
+            
+            <div style={styles.teamsList}>
+              {groep.teams.map((team, idx) => (
+                <div key={idx} style={styles.teamItem}>
+                  <span>{idx + 1}. {team}</span>
+                </div>
+              ))}
+            </div>
 
-      {error && <div style={styles.errorBox}>⚠️ {error}</div>}
-
-      {results && results.type === "poule" && (
-        <div style={styles.resultsContainer}>
-          <pre style={styles.preStyle}>{JSON.stringify(results.data, null, 2)}</pre>
-        </div>
-      )}
-
-      {!results && !loading && !error && (
-        <div style={styles.emptyState}>
-          <p>Klik "Poules ophalen" voor groepindelingen</p>
-        </div>
-      )}
+            {groep.matches && groep.matches.length > 0 && (
+              <div style={styles.matchesList}>
+                <p style={styles.matchesTitle}>Wedstrijden:</p>
+                {groep.matches.map((match) => (
+                  <div key={match.id} style={styles.matchItem(match.played)}>
+                    <span>{match.home} vs {match.away}</span>
+                    <span style={styles.matchScore}>
+                      {match.played ? match.score : "Niet gespeeld"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 
@@ -257,25 +334,95 @@ export default function Home() {
         <p>Beste spelers, assists & ratings</p>
       </div>
 
-      <button 
-        onClick={handleStats}
-        disabled={loading}
-        style={styles.analyzeButton}
-      >
-        {loading ? "⏳ Laden..." : "🔍 Statistieken ophalen"}
-      </button>
+      <div style={styles.statsControls}>
+        <button 
+          onClick={handleUpdateStats}
+          disabled={loading}
+          style={styles.updateButton}
+        >
+          {loading ? "⏳ Updating..." : "🔄 Auto-update (Claude)"}
+        </button>
+        <button 
+          onClick={() => setEditingStats(!editingStats)}
+          style={styles.editButton}
+        >
+          {editingStats ? "✅ Klaar" : "✏️ Handmatig bewerken"}
+        </button>
+      </div>
 
       {error && <div style={styles.errorBox}>⚠️ {error}</div>}
 
-      {results && results.type === "stats" && (
-        <div style={styles.resultsContainer}>
-          <pre style={styles.preStyle}>{JSON.stringify(results.data, null, 2)}</pre>
+      <div style={styles.statsTable}>
+        <div style={styles.statsHeader}>
+          <div style={{flex: 0.5}}>Rank</div>
+          <div style={{flex: 2}}>Speler</div>
+          <div style={{flex: 1}}>Team</div>
+          <div style={{flex: 0.7}}>⚽ Goals</div>
+          <div style={{flex: 0.7}}>🎯 Assists</div>
+          <div style={{flex: 0.7}}>⭐ Rating</div>
         </div>
-      )}
 
-      {!results && !loading && !error && (
-        <div style={styles.emptyState}>
-          <p>Klik "Statistieken ophalen" voor de meeste goals, assists & ratings</p>
+        {stats.map((stat, idx) => (
+          <div key={idx} style={styles.statsRow(idx)}>
+            <div style={{flex: 0.5, textAlign: "center", fontWeight: "700"}}>#{stat.rank}</div>
+            {editingStats ? (
+              <>
+                <div style={{flex: 2}}>
+                  <input 
+                    value={stat.speler}
+                    onChange={(e) => updateStat(idx, "speler", e.target.value)}
+                    style={styles.editInput}
+                  />
+                </div>
+                <div style={{flex: 1}}>
+                  <input 
+                    value={stat.team}
+                    onChange={(e) => updateStat(idx, "team", e.target.value)}
+                    style={styles.editInput}
+                  />
+                </div>
+                <div style={{flex: 0.7}}>
+                  <input 
+                    type="number"
+                    value={stat.goals}
+                    onChange={(e) => updateStat(idx, "goals", e.target.value)}
+                    style={styles.editInput}
+                  />
+                </div>
+                <div style={{flex: 0.7}}>
+                  <input 
+                    type="number"
+                    value={stat.assists}
+                    onChange={(e) => updateStat(idx, "assists", e.target.value)}
+                    style={styles.editInput}
+                  />
+                </div>
+                <div style={{flex: 0.7}}>
+                  <input 
+                    type="number"
+                    value={stat.rating}
+                    onChange={(e) => updateStat(idx, "rating", e.target.value)}
+                    style={styles.editInput}
+                    step="0.1"
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{flex: 2, fontWeight: "600"}}>{stat.speler}</div>
+                <div style={{flex: 1}}>{stat.team}</div>
+                <div style={{flex: 0.7, textAlign: "center"}}>{stat.goals}</div>
+                <div style={{flex: 0.7, textAlign: "center"}}>{stat.assists}</div>
+                <div style={{flex: 0.7, textAlign: "center"}}>{stat.rating}</div>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {editingStats && (
+        <div style={styles.editNotice}>
+          💾 Je kunt hier stats handmatig aanpassen. Click "Klaar" om op te slaan.
         </div>
       )}
     </div>
@@ -292,7 +439,6 @@ export default function Home() {
   );
 }
 
-// TIP CARD COMPONENT
 function TipCard({ tip, isLive }) {
   return (
     <div style={styles.tipCard}>
@@ -315,7 +461,6 @@ function TipCard({ tip, isLive }) {
   );
 }
 
-// PARLAY CARD COMPONENT
 function ParlayCard({ parlay, isLive }) {
   return (
     <div style={styles.parlayCard(parlay.risk)}>
@@ -332,7 +477,6 @@ function ParlayCard({ parlay, isLive }) {
   );
 }
 
-// STYLES
 const styles = {
   container: {
     minHeight: "100vh",
@@ -629,19 +773,154 @@ const styles = {
     marginTop: "10px"
   },
 
-  preStyle: {
-    background: "#F5F5F5",
-    padding: "15px",
-    borderRadius: "8px",
-    overflow: "auto",
-    fontSize: "12px"
-  },
-
   emptyState: {
     background: "white",
     borderRadius: "12px",
     padding: "40px",
     textAlign: "center",
     color: "#999"
+  },
+
+  // POULES STYLES
+  poulesContainer: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
+    gap: "20px",
+    background: "white",
+    borderRadius: "12px",
+    padding: "25px",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.2)"
+  },
+
+  pouleCard: {
+    background: "#F9F9F9",
+    border: "2px solid #0F3460",
+    borderRadius: "8px",
+    padding: "15px"
+  },
+
+  pouleTitle: {
+    fontSize: "16px",
+    fontWeight: "700",
+    color: "#0F3460",
+    margin: "0 0 15px",
+    paddingBottom: "10px",
+    borderBottom: "2px solid #0F3460"
+  },
+
+  teamsList: {
+    marginBottom: "15px"
+  },
+
+  teamItem: {
+    padding: "8px",
+    background: "white",
+    border: "1px solid #E0E0E0",
+    borderRadius: "6px",
+    marginBottom: "6px",
+    fontSize: "13px"
+  },
+
+  matchesList: {
+    marginTop: "15px",
+    paddingTop: "15px",
+    borderTop: "2px solid #E0E0E0"
+  },
+
+  matchesTitle: {
+    fontSize: "12px",
+    fontWeight: "700",
+    color: "#666",
+    margin: "0 0 8px"
+  },
+
+  matchItem: (played) => ({
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "8px",
+    background: played ? "#E8F5E9" : "#FFF3E0",
+    borderRadius: "6px",
+    marginBottom: "6px",
+    fontSize: "12px",
+    border: `1px solid ${played ? "#4CAF50" : "#FF9800"}`
+  }),
+
+  matchScore: {
+    fontWeight: "700",
+    color: "#0F3460"
+  },
+
+  // STATS STYLES
+  statsControls: {
+    display: "flex",
+    gap: "15px",
+    marginBottom: "25px"
+  },
+
+  updateButton: {
+    flex: 1,
+    padding: "12px",
+    background: "linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%)",
+    color: "white",
+    border: "none",
+    borderRadius: "8px",
+    fontWeight: "600",
+    cursor: "pointer"
+  },
+
+  editButton: {
+    flex: 1,
+    padding: "12px",
+    background: "linear-gradient(135deg, #FF9E1B 0%, #FFD93D 100%)",
+    color: "white",
+    border: "none",
+    borderRadius: "8px",
+    fontWeight: "600",
+    cursor: "pointer"
+  },
+
+  statsTable: {
+    background: "white",
+    borderRadius: "12px",
+    overflow: "hidden",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.2)"
+  },
+
+  statsHeader: {
+    display: "flex",
+    background: "#0F3460",
+    color: "white",
+    padding: "15px",
+    fontWeight: "700",
+    fontSize: "13px"
+  },
+
+  statsRow: (idx) => ({
+    display: "flex",
+    padding: "15px",
+    background: idx % 2 === 0 ? "white" : "#F9F9F9",
+    borderBottom: "1px solid #E0E0E0",
+    fontSize: "13px",
+    alignItems: "center"
+  }),
+
+  editInput: {
+    width: "100%",
+    padding: "8px",
+    border: "1px solid #DDD",
+    borderRadius: "6px",
+    fontSize: "13px"
+  },
+
+  editNotice: {
+    background: "#FFF8E1",
+    border: "2px solid #FBC02D",
+    borderRadius: "8px",
+    padding: "15px",
+    marginTop: "20px",
+    textAlign: "center",
+    color: "#F57F17",
+    fontWeight: "600"
   }
 };
