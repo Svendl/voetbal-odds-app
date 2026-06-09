@@ -1,5 +1,81 @@
 import { useState } from "react";
 
+// ALLE WK 2026 FIXTURES (72 MATCHES) - STAP 5
+const WK_2026_FIXTURES = [
+  { groep: "A", home: "Mexico", away: "Zuid-Afrika", date: "2026-06-11", played: false, score: null },
+  { groep: "A", home: "Zuid-Korea", away: "Tsjechië", date: "2026-06-11", played: false, score: null },
+  { groep: "A", home: "Mexico", away: "Zuid-Korea", date: "2026-06-18", played: false, score: null },
+  { groep: "A", home: "Tsjechië", away: "Zuid-Afrika", date: "2026-06-18", played: false, score: null },
+  { groep: "A", home: "Zuid-Afrika", away: "Zuid-Korea", date: "2026-06-24", played: false, score: null },
+  { groep: "A", home: "Tsjechië", away: "Mexico", date: "2026-06-24", played: false, score: null },
+  { groep: "B", home: "Canada", away: "Bosnië-Herzegovina", date: "2026-06-12", played: false, score: null },
+  { groep: "B", home: "Qatar", away: "Zwitserland", date: "2026-06-12", played: false, score: null },
+  { groep: "B", home: "Canada", away: "Qatar", date: "2026-06-19", played: false, score: null },
+  { groep: "B", home: "Zwitserland", away: "Bosnië-Herzegovina", date: "2026-06-19", played: false, score: null },
+  { groep: "B", home: "Bosnië-Herzegovina", away: "Canada", date: "2026-06-25", played: false, score: null },
+  { groep: "B", home: "Zwitserland", away: "Qatar", date: "2026-06-25", played: false, score: null },
+  { groep: "C", home: "Brazilië", away: "Marokko", date: "2026-06-13", played: false, score: null },
+  { groep: "C", home: "Haïti", away: "Schotland", date: "2026-06-13", played: false, score: null },
+  { groep: "C", home: "Brazilië", away: "Haïti", date: "2026-06-20", played: false, score: null },
+  { groep: "C", home: "Schotland", away: "Marokko", date: "2026-06-20", played: false, score: null },
+  { groep: "C", home: "Marokko", away: "Haïti", date: "2026-06-26", played: false, score: null },
+  { groep: "C", home: "Schotland", away: "Brazilië", date: "2026-06-26", played: false, score: null },
+  { groep: "D", home: "Verenigde Staten", away: "Paraguay", date: "2026-06-12", played: false, score: null },
+  { groep: "D", home: "Australië", away: "Turkije", date: "2026-06-13", played: false, score: null },
+  { groep: "D", home: "Verenigde Staten", away: "Australië", date: "2026-06-19", played: false, score: null },
+  { groep: "D", home: "Turkije", away: "Paraguay", date: "2026-06-20", played: false, score: null },
+  { groep: "D", home: "Paraguay", away: "Australië", date: "2026-06-25", played: false, score: null },
+  { groep: "D", home: "Turkije", away: "Verenigde Staten", date: "2026-06-25", played: false, score: null },
+  { groep: "E", home: "Duitsland", away: "Curaçao", date: "2026-06-14", played: false, score: null },
+  { groep: "E", home: "Ivoorkust", away: "Ecuador", date: "2026-06-14", played: false, score: null },
+  { groep: "E", home: "Duitsland", away: "Ivoorkust", date: "2026-06-21", played: false, score: null },
+  { groep: "E", home: "Ecuador", away: "Curaçao", date: "2026-06-21", played: false, score: null },
+  { groep: "E", home: "Curaçao", away: "Ivoorkust", date: "2026-06-27", played: false, score: null },
+  { groep: "E", home: "Ecuador", away: "Duitsland", date: "2026-06-27", played: false, score: null },
+  { groep: "F", home: "Nederland", away: "Japan", date: "2026-06-15", played: false, score: null },
+  { groep: "F", home: "Zweden", away: "Tunesië", date: "2026-06-15", played: false, score: null },
+  { groep: "F", home: "Nederland", away: "Zweden", date: "2026-06-22", played: false, score: null },
+  { groep: "F", home: "Tunesië", away: "Japan", date: "2026-06-22", played: false, score: null },
+  { groep: "F", home: "Japan", away: "Zweden", date: "2026-06-27", played: false, score: null },
+  { groep: "F", home: "Tunesië", away: "Nederland", date: "2026-06-27", played: false, score: null },
+  { groep: "G", home: "België", away: "Egypte", date: "2026-06-15", played: false, score: null },
+  { groep: "G", home: "Iran", away: "Nieuw-Zeeland", date: "2026-06-16", played: false, score: null },
+  { groep: "G", home: "België", away: "Iran", date: "2026-06-22", played: false, score: null },
+  { groep: "G", home: "Nieuw-Zeeland", away: "Egypte", date: "2026-06-23", played: false, score: null },
+  { groep: "G", home: "Egypte", away: "Iran", date: "2026-06-27", played: false, score: null },
+  { groep: "G", home: "Nieuw-Zeeland", away: "België", date: "2026-06-27", played: false, score: null },
+  { groep: "H", home: "Spanje", away: "Kaapverdië", date: "2026-06-16", played: false, score: null },
+  { groep: "H", home: "Saoedi-Arabië", away: "Uruguay", date: "2026-06-16", played: false, score: null },
+  { groep: "H", home: "Spanje", away: "Saoedi-Arabië", date: "2026-06-23", played: false, score: null },
+  { groep: "H", home: "Uruguay", away: "Kaapverdië", date: "2026-06-24", played: false, score: null },
+  { groep: "H", home: "Kaapverdië", away: "Saoedi-Arabië", date: "2026-06-27", played: false, score: null },
+  { groep: "H", home: "Uruguay", away: "Spanje", date: "2026-06-27", played: false, score: null },
+  { groep: "I", home: "Frankrijk", away: "Senegal", date: "2026-06-17", played: false, score: null },
+  { groep: "I", home: "Irak", away: "Noorwegen", date: "2026-06-17", played: false, score: null },
+  { groep: "I", home: "Frankrijk", away: "Irak", date: "2026-06-23", played: false, score: null },
+  { groep: "I", home: "Noorwegen", away: "Senegal", date: "2026-06-24", played: false, score: null },
+  { groep: "I", home: "Senegal", away: "Irak", date: "2026-06-27", played: false, score: null },
+  { groep: "I", home: "Noorwegen", away: "Frankrijk", date: "2026-06-27", played: false, score: null },
+  { groep: "J", home: "Argentinië", away: "Algerije", date: "2026-06-18", played: false, score: null },
+  { groep: "J", home: "Oostenrijk", away: "Jordanië", date: "2026-06-18", played: false, score: null },
+  { groep: "J", home: "Argentinië", away: "Oostenrijk", date: "2026-06-24", played: false, score: null },
+  { groep: "J", home: "Jordanië", away: "Algerije", date: "2026-06-25", played: false, score: null },
+  { groep: "J", home: "Algerije", away: "Oostenrijk", date: "2026-06-27", played: false, score: null },
+  { groep: "J", home: "Jordanië", away: "Argentinië", date: "2026-06-27", played: false, score: null },
+  { groep: "K", home: "Portugal", away: "Congo DR", date: "2026-06-19", played: false, score: null },
+  { groep: "K", home: "Oezbekistan", away: "Colombia", date: "2026-06-19", played: false, score: null },
+  { groep: "K", home: "Portugal", away: "Oezbekistan", date: "2026-06-25", played: false, score: null },
+  { groep: "K", home: "Colombia", away: "Congo DR", date: "2026-06-26", played: false, score: null },
+  { groep: "K", home: "Congo DR", away: "Oezbekistan", date: "2026-06-27", played: false, score: null },
+  { groep: "K", home: "Colombia", away: "Portugal", date: "2026-06-27", played: false, score: null },
+  { groep: "L", home: "Engeland", away: "Kroatië", date: "2026-06-17", played: false, score: null },
+  { groep: "L", home: "Ghana", away: "Panama", date: "2026-06-17", played: false, score: null },
+  { groep: "L", home: "Engeland", away: "Ghana", date: "2026-06-23", played: false, score: null },
+  { groep: "L", home: "Panama", away: "Kroatië", date: "2026-06-23", played: false, score: null },
+  { groep: "L", home: "Kroatië", away: "Ghana", date: "2026-06-27", played: false, score: null },
+  { groep: "L", home: "Panama", away: "Engeland", date: "2026-06-27", played: false, score: null }
+];
+
 // POULE KLEUREN
 const POULE_COLORS = {
   A: { bg: "#FFE5E5", border: "#FF6B6B", text: "#C92A2A" },
@@ -18,130 +94,80 @@ const POULE_COLORS = {
 
 const WK_2026_DATA = {
   poules: {
-    A: {
-      groep: "Groep A",
-      teams: [
-        { naam: "Mexico", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Zuid-Afrika", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Zuid-Korea", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Tsjechië", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 }
-      ],
-      matches: []
-    },
-    B: {
-      groep: "Groep B",
-      teams: [
-        { naam: "Canada", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Bosnië-Herzegovina", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Qatar", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Zwitserland", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 }
-      ],
-      matches: []
-    },
-    C: {
-      groep: "Groep C",
-      teams: [
-        { naam: "Brazilië", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Marokko", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Haïti", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Schotland", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 }
-      ],
-      matches: []
-    },
-    D: {
-      groep: "Groep D",
-      teams: [
-        { naam: "Verenigde Staten", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Paraguay", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Australië", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Turkije", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 }
-      ],
-      matches: []
-    },
-    E: {
-      groep: "Groep E",
-      teams: [
-        { naam: "Duitsland", punten: 3, gespeeld: 1, gewonnen: 1, gelijkspel: 0, verloren: 0, doelsaldo: 2 },
-        { naam: "Curaçao", punten: 0, gespeeld: 1, gewonnen: 0, gelijkspel: 0, verloren: 1, doelsaldo: -2 },
-        { naam: "Ivoorkust", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Ecuador", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 }
-      ],
-      matches: [
-        { id: 1, home: "Duitsland", away: "Curaçao", score: "2-0", played: true }
-      ]
-    },
-    F: {
-      groep: "Groep F",
-      teams: [
-        { naam: "Nederland", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Japan", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Zweden", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Tunesië", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 }
-      ],
-      matches: []
-    },
-    G: {
-      groep: "Groep G",
-      teams: [
-        { naam: "België", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Egypte", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Iran", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Nieuw-Zeeland", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 }
-      ],
-      matches: []
-    },
-    H: {
-      groep: "Groep H",
-      teams: [
-        { naam: "Spanje", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Kaapverdië", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Saoedi-Arabië", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Uruguay", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 }
-      ],
-      matches: []
-    },
-    I: {
-      groep: "Groep I",
-      teams: [
-        { naam: "Frankrijk", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Senegal", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Irak", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Noorwegen", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 }
-      ],
-      matches: []
-    },
-    J: {
-      groep: "Groep J",
-      teams: [
-        { naam: "Argentinië", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Algerije", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Oostenrijk", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Jordanië", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 }
-      ],
-      matches: []
-    },
-    K: {
-      groep: "Groep K",
-      teams: [
-        { naam: "Portugal", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Congo DR", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Oezbekistan", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Colombia", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 }
-      ],
-      matches: []
-    },
-    L: {
-      groep: "Groep L",
-      teams: [
-        { naam: "Engeland", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Kroatië", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Ghana", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
-        { naam: "Panama", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 }
-      ],
-      matches: []
-    }
+    A: { groep: "Groep A", teams: [
+      { naam: "Mexico", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Zuid-Afrika", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Zuid-Korea", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Tsjechië", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 }
+    ], matches: [] },
+    B: { groep: "Groep B", teams: [
+      { naam: "Canada", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Bosnië-Herzegovina", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Qatar", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Zwitserland", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 }
+    ], matches: [] },
+    C: { groep: "Groep C", teams: [
+      { naam: "Brazilië", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Marokko", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Haïti", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Schotland", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 }
+    ], matches: [] },
+    D: { groep: "Groep D", teams: [
+      { naam: "Verenigde Staten", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Paraguay", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Australië", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Turkije", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 }
+    ], matches: [] },
+    E: { groep: "Groep E", teams: [
+      { naam: "Duitsland", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Curaçao", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Ivoorkust", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Ecuador", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 }
+    ], matches: [] },
+    F: { groep: "Groep F", teams: [
+      { naam: "Nederland", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Japan", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Zweden", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Tunesië", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 }
+    ], matches: [] },
+    G: { groep: "Groep G", teams: [
+      { naam: "België", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Egypte", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Iran", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Nieuw-Zeeland", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 }
+    ], matches: [] },
+    H: { groep: "Groep H", teams: [
+      { naam: "Spanje", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Kaapverdië", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Saoedi-Arabië", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Uruguay", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 }
+    ], matches: [] },
+    I: { groep: "Groep I", teams: [
+      { naam: "Frankrijk", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Senegal", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Irak", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Noorwegen", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 }
+    ], matches: [] },
+    J: { groep: "Groep J", teams: [
+      { naam: "Argentinië", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Algerije", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Oostenrijk", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Jordanië", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 }
+    ], matches: [] },
+    K: { groep: "Groep K", teams: [
+      { naam: "Portugal", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Congo DR", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Oezbekistan", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Colombia", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 }
+    ], matches: [] },
+    L: { groep: "Groep L", teams: [
+      { naam: "Engeland", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Kroatië", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Ghana", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 },
+      { naam: "Panama", punten: 0, gespeeld: 0, gewonnen: 0, gelijkspel: 0, verloren: 0, doelsaldo: 0 }
+    ], matches: [] }
   },
-topscorers: [
+  topscorers: [
     { rank: 1, speler: "Kylian Mbappé", team: "Frankrijk", goals: 0, assists: 0, rating: 0.0 },
     { rank: 2, speler: "Harry Kane", team: "Engeland", goals: 0, assists: 0, rating: 0.0 },
     { rank: 3, speler: "Vinícius Júnior", team: "Brazilië", goals: 0, assists: 0, rating: 0.0 },
@@ -150,6 +176,12 @@ topscorers: [
     { rank: 6, speler: "Robert Lewandowski", team: "Polen", goals: 0, assists: 0, rating: 0.0 }
   ]
 };
+
+// STAP 6: Laad fixtures in poules
+Object.keys(WK_2026_DATA.poules).forEach(key => {
+  const fixtures = WK_2026_FIXTURES.filter(f => f.groep === key);
+  WK_2026_DATA.poules[key].matches = fixtures;
+});
 
 export default function Home() {
   const [currentPage, setCurrentPage] = useState("home");
@@ -227,6 +259,46 @@ export default function Home() {
     });
 
     return standings.sort((a, b) => b.punten - a.punten || b.doelsaldo - a.doelsaldo);
+  };
+
+  // STAP 4: handleUpdatePoules Functie
+  const handleUpdatePoules = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/update-poules", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error);
+
+      if (data.matches && data.matches.length > 0) {
+        const updatedPoules = { ...poulesData };
+        
+        data.matches.forEach(match => {
+          Object.keys(updatedPoules).forEach(groupKey => {
+            const groupMatches = updatedPoules[groupKey].matches;
+            const existingMatch = groupMatches.find(
+              m => m.home === match.home && m.away === match.away
+            );
+            
+            if (existingMatch) {
+              existingMatch.score = match.score;
+              existingMatch.played = true;
+            }
+          });
+        });
+        
+        setPoulesData(updatedPoules);
+        alert(`✅ ${data.matches.length} wedstrijden bijgewerkt!`);
+      }
+    } catch (err) {
+      setError(`Fout bij updaten: ${err.message}`);
+    }
+    setLoading(false);
   };
 
   const renderHome = () => (
@@ -345,6 +417,18 @@ export default function Home() {
         <p>WK 2026 Groepindelingen met live punten</p>
       </div>
 
+      <div style={styles.statsControls}>
+        <button 
+          onClick={handleUpdatePoules}
+          disabled={loading}
+          style={styles.updateButton}
+        >
+          {loading ? "⏳ Poules updaten..." : "🔄 Poules automatisch updaten"}
+        </button>
+      </div>
+
+      {error && <div style={styles.errorBox}>⚠️ {error}</div>}
+
       <div style={styles.poulesGrid}>
         {Object.entries(poulesData).map(([key, groep]) => {
           const standings = calculateStandings(groep.teams, groep.matches);
@@ -382,7 +466,7 @@ export default function Home() {
                 <div style={styles.matchesSection}>
                   <p style={styles.matchesTitle}>Wedstrijden:</p>
                   {groep.matches.map((match) => (
-                    <div key={match.id} style={{...styles.matchBox, backgroundColor: match.played ? color.bg : "white"}}>
+                    <div key={match.date + match.home} style={{...styles.matchBox, backgroundColor: match.played ? color.bg : "white"}}>
                       <span>{match.home} vs {match.away}</span>
                       <span style={{fontWeight: "700", color: match.played ? color.text : "#999"}}>{match.played ? match.score : "—"}</span>
                     </div>
@@ -551,6 +635,7 @@ const styles = {
   matchesTitle: { fontSize: "11px", fontWeight: "700", margin: "0 0 8px", opacity: "0.7" },
   matchBox: { display: "flex", justifyContent: "space-between", padding: "8px", borderRadius: "6px", marginBottom: "6px", border: "1px solid #E0E0E0", fontSize: "12px" },
   statsControls: { display: "flex", gap: "15px", marginBottom: "25px" },
+  updateButton: { flex: 1, padding: "12px", background: "linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%)", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" },
   editButton: { flex: 1, padding: "12px", background: "linear-gradient(135deg, #FF9E1B 0%, #FFD93D 100%)", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" },
   statsTable: { background: "white", borderRadius: "12px", overflow: "hidden", boxShadow: "0 10px 30px rgba(0,0,0,0.2)" },
   statsHeader: { display: "flex", background: "#0F3460", color: "white", padding: "15px", fontWeight: "700", fontSize: "13px" },
