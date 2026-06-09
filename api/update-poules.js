@@ -1,86 +1,58 @@
 export default async (req, res) => {
-  // Alleen POST requests toestaan
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Alleen POST requests toegestaan" });
   }
 
   try {
-    const API_KEY = process.env.API_FOOTBALL_KEY;
+    console.log("📡 Fetching van TheSportsDB...");
 
-    console.log("🔍 DEBUG: API_KEY aanwezig?", !!API_KEY);
-
-    if (!API_KEY) {
-      return res.status(500).json({ 
-        error: "❌ API_FOOTBALL_KEY niet ingesteld in Vercel environments" 
-      });
-    }
-
-    console.log("📡 DEBUG: Fetching van football-data API...");
-
-    // Haal alle WK 2026 matches op
+    // TheSportsDB - GRATIS, geen API key nodig!
     const response = await fetch(
-      "https://v3.football-data.org/v4/competitions/WC/matches",
+      "https://www.thesportsdb.com/api/v1/eventslast.php?id=133602",
       {
         method: "GET",
-        headers: { 
-          "X-Auth-Token": API_KEY,
-          "Content-Type": "application/json"
-        }
+        headers: { "Content-Type": "application/json" }
       }
     );
 
-    console.log("📊 DEBUG: Response status:", response.status);
+    console.log("📊 Response status:", response.status);
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error("❌ API Error:", errorData);
-      return res.status(response.status).json({ 
-        error: `API Error (${response.status}): ${errorData.message || "Unknown error"}`,
-        details: errorData
-      });
+      throw new Error(`HTTP ${response.status}`);
     }
 
     const data = await response.json();
-    console.log("✅ DEBUG: Matches ontvangen:", data.matches?.length || 0);
+    console.log("✅ Data ontvangen");
 
-    if (!data.matches || data.matches.length === 0) {
+    if (!data.results || data.results.length === 0) {
       return res.status(200).json({
         success: true,
         matches: [],
-        message: "Geen matches gevonden voor WK 2026",
+        message: "Geen matches beschikbaar",
         timestamp: new Date().toISOString()
       });
     }
 
-    // Parse de matches in ons format
-    const updatedMatches = data.matches
-      .filter(match => {
-        // Filter alleen groepsfase matches
-        return match.stage === "GROUP_STAGE" && 
-               (match.status === "FINISHED" || match.status === "IN_PLAY");
-      })
-      .map(match => {
-        // Bepaal groep
-        let groep = "A";
-        if (match.group) {
-          groep = match.group.charAt(match.group.length - 1);
-        }
+    // Parse matches
+    const updatedMatches = data.results.map(event => {
+      const homeGoals = event.intHomeScore;
+      const awayGoals = event.intAwayScore;
+      const score = homeGoals !== null && awayGoals !== null 
+        ? `${homeGoals}-${awayGoals}`
+        : null;
 
-        return {
-          groep: groep,
-          home: match.homeTeam.name,
-          away: match.awayTeam.name,
-          score: match.score.fullTime.home !== null && match.score.fullTime.away !== null
-            ? `${match.score.fullTime.home}-${match.score.fullTime.away}`
-            : null,
-          played: match.status === "FINISHED",
-          date: match.utcDate
-        };
-      });
+      return {
+        groep: "A", // TheSportsDB geeft groep niet, dus default
+        home: event.strHomeTeam,
+        away: event.strAwayTeam,
+        score: score,
+        played: score !== null,
+        date: event.dateEvent
+      };
+    });
 
-    console.log("✅ Parsed matches:", updatedMatches.length);
+    console.log("✅ Parsed:", updatedMatches.length, "matches");
 
-    // Return de bijgewerkte matches
     res.status(200).json({
       success: true,
       matches: updatedMatches,
@@ -89,11 +61,10 @@ export default async (req, res) => {
     });
 
   } catch (error) {
-    console.error("💥 CATCH ERROR:", error);
+    console.error("💥 ERROR:", error.message);
     res.status(500).json({
-      error: "Fout bij het ophalen van poule-gegevens",
-      details: error.message,
-      stack: error.stack
+      error: "Fout bij API call",
+      details: error.message
     });
   }
 };
