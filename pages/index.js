@@ -8,7 +8,7 @@ export default function Home() {
   const [error, setError] = useState(null);
   const [useWebSearch, setUseWebSearch] = useState(true);
 
-  const handleAnalysis = async () => {
+  const handleBetting = async (isLive) => {
     setLoading(true);
     setError(null);
     setResults(null);
@@ -21,14 +21,60 @@ export default function Home() {
           analysisType: "best-odds",
           league: "wk-2026",
           date: selectedDate,
-          useWebSearch: useWebSearch
+          useWebSearch: isLive
         })
       });
 
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
-      
-      setResults(data.analysis);
+      setResults({ type: "betting", data: data.analysis });
+    } catch (err) {
+      setError(`Fout: ${err.message}`);
+    }
+    setLoading(false);
+  };
+
+  const handlePoule = async () => {
+    setLoading(true);
+    setError(null);
+    setResults(null);
+
+    try {
+      const response = await fetch("/api/analyze-odds", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          analysisType: "poule",
+          date: selectedDate
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error);
+      setResults({ type: "poule", data: data.analysis });
+    } catch (err) {
+      setError(`Fout: ${err.message}`);
+    }
+    setLoading(false);
+  };
+
+  const handleStats = async () => {
+    setLoading(true);
+    setError(null);
+    setResults(null);
+
+    try {
+      const response = await fetch("/api/analyze-odds", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          analysisType: "stats"
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error);
+      setResults({ type: "stats", data: data.analysis });
     } catch (err) {
       setError(`Fout: ${err.message}`);
     }
@@ -39,35 +85,53 @@ export default function Home() {
     <div style={styles.homeContainer}>
       <div style={styles.header}>
         <div style={styles.logo}>⚽</div>
-        <h1 style={styles.title}>WK 2026 ODDS ANALYZER</h1>
-        <p style={styles.subtitle}>AI-aangestuurde voetbal tips & betting analyse</p>
+        <h1 style={styles.title}>WK 2026 CENTER</h1>
+        <p style={styles.subtitle}>Tips, statistieken & voetbal analyse</p>
       </div>
 
       <div style={styles.menuGrid}>
         <button
-          onClick={() => setCurrentPage("betting-live")}
+          onClick={() => { setCurrentPage("betting-live"); handleBetting(true); }}
           style={{...styles.menuButton, ...styles.buttonLive}}
         >
           <div style={styles.buttonIcon}>💎</div>
           <h2 style={styles.buttonTitle}>Real-Time Tips</h2>
-          <p style={styles.buttonDesc}>Live odds van bookmakers</p>
-          <p style={styles.buttonPrice}>€0.50 - €1.00 per analyse</p>
+          <p style={styles.buttonDesc}>Live odds</p>
+          <p style={styles.buttonPrice}>€0.50-1.00</p>
         </button>
 
         <button
-          onClick={() => setCurrentPage("betting-budget")}
+          onClick={() => { setCurrentPage("betting-budget"); handleBetting(false); }}
           style={{...styles.menuButton, ...styles.buttonBudget}}
         >
           <div style={styles.buttonIcon}>⚡</div>
           <h2 style={styles.buttonTitle}>Budget Tips</h2>
-          <p style={styles.buttonDesc}>Tips + jij voegt odds in</p>
-          <p style={styles.buttonPrice}>€0.05 - €0.10 per analyse</p>
+          <p style={styles.buttonDesc}>Goedkoop</p>
+          <p style={styles.buttonPrice}>€0.05-0.10</p>
+        </button>
+
+        <button
+          onClick={() => { setCurrentPage("poule"); handlePoule(); }}
+          style={{...styles.menuButton, ...styles.buttonPoule}}
+        >
+          <div style={styles.buttonIcon}>📋</div>
+          <h2 style={styles.buttonTitle}>Poules & Uitslagen</h2>
+          <p style={styles.buttonDesc}>Groepindelingen</p>
+        </button>
+
+        <button
+          onClick={() => { setCurrentPage("stats"); handleStats(); }}
+          style={{...styles.menuButton, ...styles.buttonStats}}
+        >
+          <div style={styles.buttonIcon}>🏆</div>
+          <h2 style={styles.buttonTitle}>Topscorers & Stats</h2>
+          <p style={styles.buttonDesc}>Beste spelers</p>
         </button>
       </div>
 
       <div style={styles.info}>
-        <p>🏆 WK 2026: 11 juni - 19 juli</p>
-        <p>⚠️ Speel verantwoord • 18+ • Disclaimer: AI-analyse, geen garantie</p>
+        <p>🏆 WK 2026: 11 juni - 19 juli | 12 groepen | 48 teams</p>
+        <p>⚠️ Speel verantwoord • 18+ • Disclaimer: AI-analyse</p>
       </div>
     </div>
   );
@@ -75,12 +139,12 @@ export default function Home() {
   const renderBetting = (isLive) => (
     <div style={styles.pageContainer}>
       <button onClick={() => setCurrentPage("home")} style={styles.backButton}>
-        ← Terug
+        ← Menu
       </button>
 
       <div style={styles.pageHeader}>
         <h1>{isLive ? "💎 Real-Time Tips" : "⚡ Budget Tips"}</h1>
-        <p>{isLive ? "Live odds van Bet365, Toto, BetCity, Unibet" : "Jij voegt de odds in van je bookmaker"}</p>
+        <p>{isLive ? "Live odds analyse" : "Jij voegt odds in"}</p>
       </div>
 
       <div style={styles.controlPanel}>
@@ -92,9 +156,8 @@ export default function Home() {
           style={styles.dateInput}
           disabled={loading}
         />
-
         <button 
-          onClick={handleAnalysis}
+          onClick={() => handleBetting(isLive)}
           disabled={loading}
           style={styles.analyzeButton}
         >
@@ -104,92 +167,40 @@ export default function Home() {
 
       {error && <div style={styles.errorBox}>⚠️ {error}</div>}
 
-      {results && (
+      {results && results.type === "betting" && (
         <div style={styles.resultsContainer}>
-          <div style={styles.tipSection("low")}>
-            <h2>🟢 Laag Risico (70%+)</h2>
-            {results.tips?.low_risk && results.tips.low_risk.map((tip) => (
-              <div key={tip.id} style={styles.tipCard}>
-                <div style={styles.tipHeader}>
-                  <h3>{tip.bet}</h3>
-                  <span style={styles.winkans}>{tip.win_chance}%</span>
-                </div>
-                <p style={styles.tipWhy}>{tip.why}</p>
-                {isLive && tip.odds && (
-                  <div style={styles.oddsList}>
-                    {Object.entries(tip.odds).map(([book, odd]) => (
-                      <div key={book} style={styles.oddItem}>
-                        <span>{book.charAt(0).toUpperCase() + book.slice(1)}</span>
-                        <strong>{odd || "—"}</strong>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+          {results.data.tips?.low_risk && (
+            <div style={styles.tipSection("low")}>
+              <h2>🟢 Laag Risico (70%+)</h2>
+              {results.data.tips.low_risk.map((tip) => (
+                <TipCard key={tip.id} tip={tip} isLive={isLive} />
+              ))}
+            </div>
+          )}
 
-          <div style={styles.tipSection("medium")}>
-            <h2>🟡 Gemiddeld Risico (55-70%)</h2>
-            {results.tips?.medium_risk && results.tips.medium_risk.map((tip) => (
-              <div key={tip.id} style={styles.tipCard}>
-                <div style={styles.tipHeader}>
-                  <h3>{tip.bet}</h3>
-                  <span style={styles.winkans}>{tip.win_chance}%</span>
-                </div>
-                <p style={styles.tipWhy}>{tip.why}</p>
-                {isLive && tip.odds && (
-                  <div style={styles.oddsList}>
-                    {Object.entries(tip.odds).map(([book, odd]) => (
-                      <div key={book} style={styles.oddItem}>
-                        <span>{book.charAt(0).toUpperCase() + book.slice(1)}</span>
-                        <strong>{odd || "—"}</strong>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+          {results.data.tips?.medium_risk && (
+            <div style={styles.tipSection("medium")}>
+              <h2>🟡 Gemiddeld (55-70%)</h2>
+              {results.data.tips.medium_risk.map((tip) => (
+                <TipCard key={tip.id} tip={tip} isLive={isLive} />
+              ))}
+            </div>
+          )}
 
-          <div style={styles.tipSection("high")}>
-            <h2>🔴 Hoog Risico (&lt;55%)</h2>
-            {results.tips?.high_risk && results.tips.high_risk.map((tip) => (
-              <div key={tip.id} style={styles.tipCard}>
-                <div style={styles.tipHeader}>
-                  <h3>{tip.bet}</h3>
-                  <span style={styles.winkans}>{tip.win_chance}%</span>
-                </div>
-                <p style={styles.tipWhy}>{tip.why}</p>
-                {isLive && tip.odds && (
-                  <div style={styles.oddsList}>
-                    {Object.entries(tip.odds).map(([book, odd]) => (
-                      <div key={book} style={styles.oddItem}>
-                        <span>{book.charAt(0).toUpperCase() + book.slice(1)}</span>
-                        <strong>{odd || "—"}</strong>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+          {results.data.tips?.high_risk && (
+            <div style={styles.tipSection("high")}>
+              <h2>🔴 Hoog Risico (&lt;55%)</h2>
+              {results.data.tips.high_risk.map((tip) => (
+                <TipCard key={tip.id} tip={tip} isLive={isLive} />
+              ))}
+            </div>
+          )}
 
-          {results.parlay && (
+          {results.data.parlay && (
             <div style={styles.parlaySection}>
-              <h2>💰 Aanbevolen Verdubbelaars</h2>
-              {results.parlay.map((p) => (
-                <div key={p.id} style={styles.parlayCard(p.risk)}>
-                  <h3>{p.id}. {p.name}</h3>
-                  <p>{p.why}</p>
-                  <div style={styles.parlayBets}>
-                    {p.bets?.map((b, i) => <p key={i}>• {b}</p>)}
-                  </div>
-                  <div style={styles.parlayStats}>
-                    <div>Winkans: <strong>{p.win_chance}%</strong></div>
-                    {isLive && <div>Odds: <strong>{p.odds?.bet365 || "—"}</strong></div>}
-                  </div>
-                </div>
+              <h2>💰 Verdubbelaars</h2>
+              {results.data.parlay.map((p) => (
+                <ParlayCard key={p.id} parlay={p} isLive={isLive} />
               ))}
             </div>
           )}
@@ -198,7 +209,73 @@ export default function Home() {
 
       {!results && !loading && !error && (
         <div style={styles.emptyState}>
-          <p>📅 Selecteer een datum en klik "Tips ophalen"</p>
+          <p>📅 Selecteer datum en klik "Tips ophalen"</p>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderPoule = () => (
+    <div style={styles.pageContainer}>
+      <button onClick={() => setCurrentPage("home")} style={styles.backButton}>← Menu</button>
+
+      <div style={styles.pageHeader}>
+        <h1>📋 Poules & Uitslagen</h1>
+        <p>Groepindelingen en wedstrijdresultaten</p>
+      </div>
+
+      <button 
+        onClick={handlePoule}
+        disabled={loading}
+        style={styles.analyzeButton}
+      >
+        {loading ? "⏳ Laden..." : "🔍 Poules ophalen"}
+      </button>
+
+      {error && <div style={styles.errorBox}>⚠️ {error}</div>}
+
+      {results && results.type === "poule" && (
+        <div style={styles.resultsContainer}>
+          <pre style={styles.preStyle}>{JSON.stringify(results.data, null, 2)}</pre>
+        </div>
+      )}
+
+      {!results && !loading && !error && (
+        <div style={styles.emptyState}>
+          <p>Klik "Poules ophalen" voor groepindelingen</p>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderStats = () => (
+    <div style={styles.pageContainer}>
+      <button onClick={() => setCurrentPage("home")} style={styles.backButton}>← Menu</button>
+
+      <div style={styles.pageHeader}>
+        <h1>🏆 Topscorers & Statistieken</h1>
+        <p>Beste spelers, assists & ratings</p>
+      </div>
+
+      <button 
+        onClick={handleStats}
+        disabled={loading}
+        style={styles.analyzeButton}
+      >
+        {loading ? "⏳ Laden..." : "🔍 Statistieken ophalen"}
+      </button>
+
+      {error && <div style={styles.errorBox}>⚠️ {error}</div>}
+
+      {results && results.type === "stats" && (
+        <div style={styles.resultsContainer}>
+          <pre style={styles.preStyle}>{JSON.stringify(results.data, null, 2)}</pre>
+        </div>
+      )}
+
+      {!results && !loading && !error && (
+        <div style={styles.emptyState}>
+          <p>Klik "Statistieken ophalen" voor de meeste goals, assists & ratings</p>
         </div>
       )}
     </div>
@@ -209,17 +286,59 @@ export default function Home() {
       {currentPage === "home" && renderHome()}
       {currentPage === "betting-live" && renderBetting(true)}
       {currentPage === "betting-budget" && renderBetting(false)}
+      {currentPage === "poule" && renderPoule()}
+      {currentPage === "stats" && renderStats()}
     </div>
   );
 }
 
+// TIP CARD COMPONENT
+function TipCard({ tip, isLive }) {
+  return (
+    <div style={styles.tipCard}>
+      <div style={styles.tipHeader}>
+        <h3 style={styles.tipBet}>{tip.bet}</h3>
+        <span style={styles.winkans}>{tip.win_chance}%</span>
+      </div>
+      <p style={styles.tipWhy}>{tip.why}</p>
+      {isLive && tip.odds && (
+        <div style={styles.oddsList}>
+          {Object.entries(tip.odds).map(([book, odd]) => (
+            <div key={book} style={styles.oddItem}>
+              <div style={styles.oddLabel}>{book.toUpperCase()}</div>
+              <div style={styles.oddPrice}>{odd || "—"}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// PARLAY CARD COMPONENT
+function ParlayCard({ parlay, isLive }) {
+  return (
+    <div style={styles.parlayCard(parlay.risk)}>
+      <h3>{parlay.id}. {parlay.name}</h3>
+      <p style={styles.parlayWhy}>{parlay.why}</p>
+      <div style={styles.parlayBets}>
+        {parlay.bets?.map((b, i) => <p key={i}>• {b}</p>)}
+      </div>
+      <div style={styles.parlayStats}>
+        <div><strong>Winkans:</strong> {parlay.win_chance}%</div>
+        {isLive && <div><strong>Odds:</strong> {parlay.odds?.bet365 || "—"}</div>}
+      </div>
+    </div>
+  );
+}
+
+// STYLES
 const styles = {
   container: {
     minHeight: "100vh",
     background: "linear-gradient(135deg, #0F3460 0%, #16213E 50%, #0F3460 100%)",
     padding: "20px",
-    fontFamily: "'Segoe UI', Arial, sans-serif",
-    color: "#333"
+    fontFamily: "'Segoe UI', Arial, sans-serif"
   },
 
   homeContainer: {
@@ -257,20 +376,20 @@ const styles = {
   menuGrid: {
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
-    gap: "25px",
-    maxWidth: "700px",
+    gap: "20px",
+    maxWidth: "900px",
     marginBottom: "50px"
   },
 
   menuButton: {
     border: "none",
     borderRadius: "16px",
-    padding: "50px 30px",
+    padding: "40px 25px",
     cursor: "pointer",
     color: "white",
     textAlign: "center",
     boxShadow: "0 15px 35px rgba(0,0,0,0.3)",
-    transition: "transform 0.3s, box-shadow 0.3s",
+    transition: "transform 0.3s",
     fontSize: "inherit"
   },
 
@@ -282,8 +401,16 @@ const styles = {
     background: "linear-gradient(135deg, #6C5CE7 0%, #A29BFE 100%)"
   },
 
+  buttonPoule: {
+    background: "linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%)"
+  },
+
+  buttonStats: {
+    background: "linear-gradient(135deg, #FF6B6B 0%, #EE5A6F 100%)"
+  },
+
   buttonIcon: {
-    fontSize: "50px",
+    fontSize: "48px",
     marginBottom: "15px"
   },
 
@@ -295,20 +422,20 @@ const styles = {
 
   buttonDesc: {
     fontSize: "13px",
-    margin: "0 0 15px",
+    margin: "0",
     opacity: "0.95"
   },
 
   buttonPrice: {
     fontSize: "12px",
     fontWeight: "600",
-    margin: "0",
+    margin: "8px 0 0",
     opacity: "0.9"
   },
 
   info: {
     color: "white",
-    fontSize: "14px",
+    fontSize: "13px",
     opacity: "0.8"
   },
 
@@ -326,8 +453,7 @@ const styles = {
     cursor: "pointer",
     fontSize: "14px",
     fontWeight: "600",
-    marginBottom: "30px",
-    transition: "all 0.3s"
+    marginBottom: "30px"
   },
 
   pageHeader: {
@@ -373,8 +499,7 @@ const styles = {
     borderRadius: "8px",
     background: "linear-gradient(135deg, #0F3460 0%, #16213E 100%)",
     color: "white",
-    cursor: "pointer",
-    transition: "all 0.3s"
+    cursor: "pointer"
   },
 
   errorBox: {
@@ -421,6 +546,13 @@ const styles = {
     marginBottom: "8px"
   },
 
+  tipBet: {
+    fontSize: "15px",
+    fontWeight: "700",
+    margin: "0",
+    color: "#333"
+  },
+
   winkans: {
     fontWeight: "700",
     color: "#4CAF50",
@@ -444,8 +576,19 @@ const styles = {
     background: "#F0F0F0",
     padding: "8px",
     borderRadius: "6px",
-    fontSize: "11px",
     textAlign: "center"
+  },
+
+  oddLabel: {
+    fontSize: "10px",
+    color: "#999",
+    marginBottom: "4px"
+  },
+
+  oddPrice: {
+    fontSize: "14px",
+    fontWeight: "700",
+    color: "#333"
   },
 
   parlaySection: {
@@ -467,9 +610,16 @@ const styles = {
     };
   },
 
+  parlayWhy: {
+    fontSize: "12px",
+    color: "#666",
+    margin: "8px 0"
+  },
+
   parlayBets: {
     fontSize: "12px",
-    margin: "10px 0"
+    margin: "10px 0",
+    color: "#333"
   },
 
   parlayStats: {
@@ -477,6 +627,14 @@ const styles = {
     gap: "20px",
     fontSize: "12px",
     marginTop: "10px"
+  },
+
+  preStyle: {
+    background: "#F5F5F5",
+    padding: "15px",
+    borderRadius: "8px",
+    overflow: "auto",
+    fontSize: "12px"
   },
 
   emptyState: {
