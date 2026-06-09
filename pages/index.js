@@ -1,73 +1,67 @@
 import { useState } from "react";
 
 // HARDCODED WK 2026 DATA
+// HARDCODED WK 2026 DATA - ECHTE POULES
 const WK_2026_DATA = {
   poules: {
     A: {
       groep: "Groep A",
-      teams: ["Nederland", "Senegal", "Ecuador", "Jamaica"],
-      matches: [
-        { id: 1, home: "Nederland", away: "Ecuador", score: "2-1", played: true },
-        { id: 2, home: "Senegal", away: "Jamaica", score: null, played: false },
-        { id: 3, home: "Nederland", away: "Senegal", score: null, played: false },
-        { id: 4, home: "Ecuador", away: "Jamaica", score: null, played: false },
-        { id: 5, home: "Jamaica", away: "Nederland", score: null, played: false },
-        { id: 6, home: "Ecuador", away: "Senegal", score: null, played: false }
-      ]
+      teams: ["Mexico", "Zuid-Afrika", "Zuid-Korea", "Tsjechië"],
+      matches: []
     },
     B: {
       groep: "Groep B",
-      teams: ["Argentina", "Uruguay", "Paraguay", "Bolivia"],
+      teams: ["Canada", "Bosnië-Herzegovina", "Qatar", "Zwitserland"],
       matches: []
     },
     C: {
       groep: "Groep C",
-      teams: ["Spanje", "Duitsland", "Hongarije", "Slowakije"],
+      teams: ["Brazilië", "Marokko", "Haïti", "Schotland"],
       matches: []
     },
     D: {
       groep: "Groep D",
-      teams: ["België", "Frankrijk", "Noorwegen", "Albanië"],
+      teams: ["Verenigde Staten", "Paraguay", "Australië", "Turkije"],
       matches: []
     },
     E: {
       groep: "Groep E",
-      teams: ["Italië", "Zwitserland", "Zweden", "Montenegro"],
+      teams: ["Duitsland", "Curaçao", "Ivoorkust", "Ecuador"],
       matches: []
     },
     F: {
       groep: "Groep F",
-      teams: ["Portugal", "Roemenië", "Israël", "Kosovo"],
+      teams: ["Nederland", "Japan", "Zweden", "Tunesië"],
       matches: []
     },
     G: {
       groep: "Groep G",
-      teams: ["Engeland", "Polen", "Tsjechië", "Litouwen"],
+      teams: ["België", "Egypte", "Iran", "Nieuw-Zeeland"],
       matches: []
     },
     H: {
       groep: "Groep H",
-      teams: ["Brazilië", "Colombia", "Chili", "Paraguay"],
+      teams: ["Spanje", "Kaapverdië", "Saoedi-Arabië", "Uruguay"],
       matches: []
     },
     I: {
       groep: "Groep I",
-      teams: ["Mexico", "Canada", "Costa Rica", "Honduras"],
+      teams: ["Frankrijk", "Senegal", "Irak", "Noorwegen"],
       matches: []
     },
     J: {
       groep: "Groep J",
-      teams: ["Japan", "Australië", "China", "Oman"],
+      teams: ["Argentinië", "Algerije", "Oostenrijk", "Jordanië"],
       matches: []
     },
     K: {
       groep: "Groep K",
-      teams: ["Iran", "Irak", "Jordanië", "Libanon"],
+      teams: ["Portugal", "Congo DR", "Oezbekistan", "Colombia"],
       matches: []
     },
     L: {
       groep: "Groep L",
-      teams: ["Egypte", "Marokko", "Algerije", "Mali"],
+      teams: ["Engeland", "Kroatië", "Ghana", "Panama"],
       matches: []
     }
   },
