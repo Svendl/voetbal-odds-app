@@ -5,57 +5,18 @@ export default async (req, res) => {
 
   try {
     const apiKey = process.env.CLAUDE_API_KEY;
-    const oddsApiKey = process.env.ODDS_API_KEY;
-    
     if (!apiKey) {
       return res.status(500).json({ error: "Claude API key not configured" });
-    }
-    if (!oddsApiKey) {
-      return res.status(500).json({ error: "Odds API key not configured" });
     }
 
     const { analysisType, league, date } = req.body;
 
-    // Haal real matches + odds op
-    let matchesData = "";
-    let hasLiveOdds = false;
-    
-    try {
-      const leagueCode = league === "wk-2026" ? "soccer_world_cup" : `soccer_${league}`;
-      
-      const oddsResponse = await fetch(
-        `https://api.the-odds-api.com/v4/sports/${leagueCode}/odds?apiKey=${oddsApiKey}&regions=eu&oddsFormat=decimal&markets=h2h`,
-        { headers: { "User-Agent": "OddsAnalyzer" } }
-      );
-      
-      if (oddsResponse.ok) {
-        const oddsJson = await oddsResponse.json();
-        const events = oddsJson.events || [];
-        
-        // Filter by date
-        const filteredEvents = events.filter(event => {
-          const eventDate = new Date(event.commence_time).toISOString().split("T")[0];
-          return eventDate === date;
-        });
+    const systemPrompt = `Je bent een expert voetbal-odds analist met web search beschikbaar.
 
-        if (filteredEvents.length > 0) {
-          hasLiveOdds = true;
-          matchesData = filteredEvents.slice(0, 10).map(event => {
-            const homeBookmaker = event.bookmakers?.[0];
-            const outcomes = homeBookmaker?.markets?.[0]?.outcomes || [];
-            const homeOdds = outcomes.find(o => o.name === event.home_team)?.price || "N/A";
-            const awayOdds = outcomes.find(o => o.name === event.away_team)?.price || "N/A";
-            return `${event.home_team} vs ${event.away_team}: Home ${homeOdds}, Away ${awayOdds}`;
-          }).join("\n");
-        }
-      }
-    } catch (oddsErr) {
-      console.log("Odds API call note:", oddsErr.message);
-    }
-
-    const systemPrompt = `Je bent een expert voetbal-odds analist. Je antwoordt ALTIJD in VALID JSON format.
-
-${hasLiveOdds ? "JE HEBT REAL LIVE ODDS ONTVANGEN - GEBRUIK DEZE!" : "Je gebruikt historische data voor analyse."}
+JE TAAK:
+1. Zoek de werkelijke voetbalwedstrijden voor ${date} in ${league === 'wk-2026' ? 'WK 2026' : league}
+2. Zoek de ECHTE odds van bookmakers (Bet365, DraftKings, etc) voor die wedstrijden
+3. Analyseer die data en geef JSON terug
 
 RESPONSE FORMAT (ALTIJD deze structuur):
 {
@@ -63,9 +24,9 @@ RESPONSE FORMAT (ALTIJD deze structuur):
     "low_risk": [
       {
         "id": 1,
-        "bet": "Bet naam",
-        "odds": 1.50,
-        "win_chance": 75,
+        "bet": "Exact bet naam (bijv: Mexico wint vs Indonesië)",
+        "odds": 1.25,
+        "win_chance": 85,
         "why": "Korte reden (1-2 zinnen)"
       }
     ],
@@ -77,41 +38,41 @@ RESPONSE FORMAT (ALTIJD deze structuur):
       "id": 1,
       "name": "Naam",
       "bets": ["Bet 1", "Bet 2"],
-      "odds": 2.63,
-      "win_chance": 57,
+      "odds": 2.50,
+      "win_chance": 50,
       "strategy": "Korte strategie",
       "risk": "low"
     }
   ]
 }
 
-STRICT RULES:
-- LOW RISK: 5 tips, 70%+
-- MEDIUM RISK: 5 tips, 55-70%
-- HIGH RISK: 5 tips, <55%
-- PARLAY: 3 verdubbelaars
-- ${hasLiveOdds ? "GEBRUIK DE REAL ODDS!" : "Gebruik realistische odds op basis van team-strength."}
-- ALTIJD VALID JSON
-- "why" max 2 zinnen`;
+CRITICAL:
+- LOW RISK: 5 tips, 70%+, ECHTE ODDS
+- MEDIUM RISK: 5 tips, 55-70%, ECHTE ODDS
+- HIGH RISK: 5 tips, <55%, ECHTE ODDS
+- PARLAY: 3 verdubbelaars met ECHTE ODDS
+- GEBRUIK WEB SEARCH VOOR ALLES
+- "why" max 2 zinnen
+- ALTIJD VALID JSON`;
 
     let userPrompt;
 
     if (league === "wk-2026") {
       userPrompt = `Analyseer WK 2026 wedstrijden van ${date}.
 
-${hasLiveOdds ? `LIVE REAL ODDS VAN BOOKMAKERS:\n${matchesData}\n\nGEBRUIK DEZE ODDS IN JE ANALYSE!` : "Analyseer op basis van team-kwaliteit en historische patronen."}
+STAP 1: Zoek alle WK 2026 wedstrijden die op ${date} gespeeld worden
+STAP 2: Zoek voor ELKE wedstrijd de ECHTE odds (Home/Away/Draw) van minstens 3 bookmakers
+STAP 3: Geef 15 betting tips (5 laag + 5 gemiddeld + 5 hoog risico) + 3 verdubbelaars in JSON
 
-Geef 15 tips (5 laag + 5 gemiddeld + 5 hoog) + 3 verdubbelaars in JSON.
-
-STRICT JSON ONLY.`;
+GEBRUIK WEB SEARCH VOOR ALLES!`;
     } else {
-      userPrompt = `Analyseer voetbal van ${date} in ${league}.
+      userPrompt = `Analyseer voetbalwedstrijden van ${date} in ${league}.
 
-${hasLiveOdds ? `REAL ODDS:\n${matchesData}` : "Analyseer op team-kwaliteit."}
+STAP 1: Zoek alle wedstrijden op die datum
+STAP 2: Zoek ECHTE odds voor die matches
+STAP 3: Geef 15 tips + 3 verdubbelaars in JSON
 
-Geef 15 tips + 3 verdubbelaars in JSON format.
-
-STRICT JSON ONLY.`;
+GEBRUIK WEB SEARCH!`;
     }
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -123,8 +84,14 @@ STRICT JSON ONLY.`;
       },
       body: JSON.stringify({
         model: "claude-opus-4-6",
-        max_tokens: 3000,
+        max_tokens: 4000,
         system: systemPrompt,
+        tools: [
+          {
+            type: "web_search_20250305",
+            name: "web_search"
+          }
+        ],
         messages: [{ role: "user", content: userPrompt }]
       })
     });
@@ -135,20 +102,27 @@ STRICT JSON ONLY.`;
       throw new Error(`Claude API error: ${data.error?.message || "Unknown"}`);
     }
 
-    const rawText = data.content[0]?.text || "";
+    // Extract text from response
+    let rawText = "";
+    if (data.content) {
+      for (const block of data.content) {
+        if (block.type === "text") {
+          rawText += block.text;
+        }
+      }
+    }
+
     let analysis;
-    
     try {
       const jsonMatch = rawText.match(/\{[\s\S]*\}/);
       analysis = jsonMatch ? JSON.parse(jsonMatch[0]) : JSON.parse(rawText);
     } catch (parseError) {
-      analysis = { error: "Parse error", raw: rawText };
+      analysis = { error: "Parse error", raw: rawText.substring(0, 500) };
     }
 
     res.status(200).json({
       success: true,
       analysis: analysis,
-      has_live_odds: hasLiveOdds,
       timestamp: new Date().toISOString()
     });
 
